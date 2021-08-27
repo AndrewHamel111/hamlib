@@ -3,10 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-static const unsigned char holdtimer = 80; 
-static const unsigned char framestoinput = 18; 
-static unsigned short framesheld = 0;
-
 #define BUTTONS_LENGTH 6
 enum BUTTONS
 {
@@ -14,7 +10,7 @@ enum BUTTONS
 };
 static bool buttonpressed[BUTTONS_LENGTH] = {false};
 
-typedef unsigned char uc;
+typedef signed char sc;
 
 UIElement CreateUIElementButton(Rectangle rectangle, char* msg, void (*func)(void))
 {
@@ -69,9 +65,9 @@ Menu CreateMenu(UIElement* elements, int elementCount)
 void ClampMenuIndex(Menu* menu)
 {
 	if (menu->index >= menu->sz)
-		menu->index = (menu->wraps) ? 0 : menu->sz - 1;
+		menu->index = (menu->wraps) ? 0 : (menu->sz - 1);
 	else if (menu->index < 0)
-		menu->index = (menu->wraps) ? menu->sz - 1 : 0;
+		menu->index = (menu->wraps) ? (menu->sz - 1) : 0;
 }
 
 void UpdateMenu(Menu* menu)
@@ -83,19 +79,7 @@ void UpdateMenu(Menu* menu)
 	buttonpressed[BUTTON_B] = IsKeyPressed(KEY_L);
 	buttonpressed[BUTTON_A] = IsKeyPressed(KEY_SEMICOLON);
 	
-	uc d = ((uc)buttonpressed[BUTTON_DOWN] + (uc)buttonpressed[BUTTON_RIGHT]) - ((uc)buttonpressed[BUTTON_UP] + (uc)buttonpressed[BUTTON_LEFT]);
-
-	if (IsKeyDown(GetKeyPressed()))
-	{
-		if ((framesheld > holdtimer) && !(framesheld % 10))
-		{
-			d = ((GetKeyPressed() == KEY_W) || (GetKeyPressed() == KEY_A)) ? -1 : (((GetKeyPressed() == KEY_S) || (GetKeyPressed() == KEY_D)) ? 1 : 0);
-		}
-
-		framesheld++;
-	}
-	else
-		framesheld = 0;
+	sc d = (sc)(buttonpressed[BUTTON_DOWN] || buttonpressed[BUTTON_RIGHT]) - (sc)(buttonpressed[BUTTON_UP] || buttonpressed[BUTTON_LEFT]);
 
     // confirm takes priority over menu navigation
     if (buttonpressed[BUTTON_B] || buttonpressed[BUTTON_A])
@@ -104,6 +88,8 @@ void UpdateMenu(Menu* menu)
     }
     else
     {
+		//menu->index += (sc)(buttonpressed[BUTTON_DOWN] || buttonpressed[BUTTON_RIGHT]) ;
+		//menu->index -= (sc)(buttonpressed[BUTTON_UP] || buttonpressed[BUTTON_LEFT]) ;
 		menu->index += d;
 
 		ClampMenuIndex(menu);

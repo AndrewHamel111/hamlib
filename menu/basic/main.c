@@ -27,7 +27,6 @@ int main(void)
 	
 	InitWindow(400, 240, "Menus Demo"); // create window
     SetTargetFPS(50);
-	SetExitKey(-1);
     
     UIElement* elements = (UIElement*)malloc(sizeof(UIElement) * 3); // create the menu
     elements[0] = CreateUIElementButton((Rectangle){10, 10, 200, 66}, "Button 1", &Button1OnSelect);

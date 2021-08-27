@@ -22,7 +22,7 @@ typedef struct Menu
 {
     UIElement* elements;
     unsigned char sz;
-    unsigned char index;
+    signed char index;
     bool wraps;
 } Menu;
 
