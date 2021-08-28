@@ -69,7 +69,8 @@ void DrawUIElement(UIElement, bool);
 /**
  * \brief Manage a valid index state. 
  */
-void ClampMenuIndex(Menu*, signed char);
+void ClampMenuIndex(Menu*);
+void ClampMenuGrid(Menu*, Vector2);
 /**
  * \brief Create a Menu from a UIElement list.
  */

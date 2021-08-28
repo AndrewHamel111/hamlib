@@ -1,6 +1,7 @@
 .PHONY: all clean
 
 # Define required raylib variables
+PROJECT_NAME := MenuDemo
 SOURCE_FILES	:= $(wildcard *.c) 
 SHOW_CONSOLE 	= FALSE
 LOUD_MAKE 	= FALSE
@@ -145,7 +146,7 @@ endif
 
 # Define all object files required
 OBJS = $(patsubst %.c, %.o, $(SOURCE_FILES))
-MAKEFILE_PARAMS = MenuGrid Menu
+MAKEFILE_PARAMS = $(PROJECT_NAME)
 
 # Default target entry
 all: 
@@ -154,11 +155,8 @@ all:
 %.o: %.c
 	$(CC) -c $< -o $@ $(CFLAGS) $(INCLUDE_PATHS) -D$(PLATFORM)
 
-MenuGrid: gridmain.o menu.o
-	$(CC) -o MenuGrid$(EXT) gridmain.o menu.o $(HAMLIB_PATH)/hamlib.o $(CFLAGS) $(INCLUDE_PATHS) $(LDFLAGS) $(LDLIBS) -D$(PLATFORM)
-
-Menu: linearmain.o menu.o
-	$(CC) -o Menu$(EXT) gridmain.o menu.o $(HAMLIB_PATH)/hamlib.o $(CFLAGS) $(INCLUDE_PATHS) $(LDFLAGS) $(LDLIBS) -D$(PLATFORM)
+$(PROJECT_NAME): $(OBJS)
+	$(CC) -o $(PROJECT_NAME)$(EXT) $(OBJS) $(HAMLIB_PATH)/hamlib.o $(CFLAGS) $(INCLUDE_PATHS) $(LDFLAGS) $(LDLIBS) -D$(PLATFORM)
 
 # Clean everything
 clean:

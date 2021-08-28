@@ -101,32 +101,31 @@ Menu CreateGridMenu(UIElement* elements, Vector2 sz)
     return menu;
 }
 
-void ClampMenuIndex(Menu* menu, signed char flat_d)
+void ClampMenuIndex(Menu* menu)
 {
-	if (menu->isGridMenu)
+	if (menu->index >= menu->_sz)
+		menu->index = (menu->wraps) ? 0 : (menu->_sz - 1);
+	else if (menu->index < 0)
+		menu->index = (menu->wraps) ? (menu->_sz - 1) : 0;
+}
+
+void ClampMenuGrid(Menu* menu, Vector2 d)
+{
+	if (menu->index >= menu->_sz)
+		menu->index = (menu->wraps) ? (menu->index % menu->_sz) : menu->_sz - 1;
+	else if (menu->index < 0)
+		menu->index = (menu->wraps) ? menu->_sz + menu->index : 0;
+
+	// if land on an empty square recursive call to apply the input again
+	while(menu->elements[menu->index].isEmpty && !((d.x == 0) && (d.y == 0)))
 	{
+    	signed char flat_d = d.x + (d.y * menu->sz.x);
+		menu->index += flat_d;
+
 		if (menu->index >= menu->_sz)
 			menu->index = (menu->wraps) ? (menu->index % menu->_sz) : menu->_sz - 1;
 		else if (menu->index < 0)
 			menu->index = (menu->wraps) ? menu->_sz + menu->index : 0;
-
-		// if land on an empty square recursive call to apply the input again
-		while(menu->elements[menu->index].isEmpty && !(flat_d != 0))
-		{
-			menu->index += flat_d;
-
-			if (menu->index >= menu->_sz)
-				menu->index = (menu->wraps) ? (menu->index % menu->_sz) : menu->_sz - 1;
-			else if (menu->index < 0)
-				menu->index = (menu->wraps) ? menu->_sz + menu->index : 0;
-		}
-	}
-	else 
-	{
-		if (menu->index >= menu->_sz)
-			menu->index = (menu->wraps) ? 0 : (menu->_sz - 1);
-		else if (menu->index < 0)
-			menu->index = (menu->wraps) ? (menu->_sz - 1) : 0;
 	}
 }
 
@@ -173,13 +172,13 @@ void UpdateMenu(Menu* menu)
 			if (menu->index == -1)
 			{
 				menu->index = menu->lastindex + flat_d;
-				ClampMenuIndex(menu, flat_d);
+				ClampMenuGrid(menu, d);
 			}
 			else
 			{
 				menu->lastindex = menu->index;
 				menu->index += flat_d;
-				ClampMenuIndex(menu, flat_d);
+				ClampMenuGrid(menu, d);
 			}
 		}
 	} // grid case
@@ -215,13 +214,13 @@ void UpdateMenu(Menu* menu)
 			if (menu->index == -1)
 			{
 				menu->index = menu->lastindex + d;
-				ClampMenuIndex(menu, d);
+				ClampMenuIndex(menu);
 			}
 			else
 			{
 				menu->lastindex = menu->index;
 				menu->index += d;
-				ClampMenuIndex(menu, d);
+				ClampMenuIndex(menu);
 			}
 		}
 	} // linear case
