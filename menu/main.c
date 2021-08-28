@@ -16,7 +16,8 @@ enum BUTTONS
 // UIElement handlers
 void ButtonOnSelect();
 
-Menu menus[4];
+#define menucount 5
+Menu menus[menucount];
 unsigned char menuindex = 0;
 
 void InitMenus();
@@ -110,6 +111,7 @@ void InitMenus()
 	elements[4] = CreateEmptyUIElement();
     elements[5] = CreateUIElementButton((Rectangle){590, 450, 200, 100}, "Butt. 4", &ButtonOnSelect);
     menus[2] = CreateGridMenu(elements, (Vector2){3,2});
+	menus[2].wrapbehaviour = MW_RISE | MW_WRAP;
 
 	// grid menu 2
     elements = (UIElement*)malloc(sizeof(UIElement) * 12);
@@ -132,11 +134,52 @@ void InitMenus()
 	elements[2].isEmpty = true;
 	elements[10].isEmpty = true;
     menus[3] = CreateGridMenu(elements, (Vector2){4,3});
+
+	// grid menu 3
+    elements = (UIElement*)malloc(sizeof(UIElement) * 25);
+    elements[0] = CreateUIElementButton((Rectangle){10, 10, 90, 90}, "1", &ButtonOnSelect);
+    elements[1] = CreateUIElementButton((Rectangle){110, 10, 90, 90}, "2", &ButtonOnSelect);
+    elements[2] = CreateUIElementButton((Rectangle){210, 10, 90, 90}, "3", &ButtonOnSelect);
+    elements[3] = CreateUIElementButton((Rectangle){310, 10, 90, 90}, "4", &ButtonOnSelect);
+    elements[4] = CreateUIElementButton((Rectangle){410, 10, 90, 90}, "5", &ButtonOnSelect);
+	
+    elements[5] = CreateUIElementButton((Rectangle){10, 110, 90, 90}, "6", &ButtonOnSelect);
+    elements[6] = CreateUIElementButton((Rectangle){110, 110, 90, 90}, "7", &ButtonOnSelect);
+    elements[7] = CreateUIElementButton((Rectangle){210, 110, 90, 90}, "8", &ButtonOnSelect);
+    elements[8] = CreateUIElementButton((Rectangle){310, 110, 90, 90}, "9", &ButtonOnSelect);
+    elements[9] = CreateUIElementButton((Rectangle){410, 110, 90, 90}, "10", &ButtonOnSelect);
+	
+    elements[10] = CreateUIElementButton((Rectangle){10 ,210, 90, 90}, "11", &ButtonOnSelect);
+    elements[11] = CreateUIElementButton((Rectangle){110 ,210, 90, 90}, "12", &ButtonOnSelect);
+    elements[12] = CreateUIElementButton((Rectangle){210 ,210, 90, 90}, "13", &ButtonOnSelect);
+    elements[13] = CreateUIElementButton((Rectangle){310, 210, 90, 90}, "14", &ButtonOnSelect);
+    elements[14] = CreateUIElementButton((Rectangle){410, 210, 90, 90}, "15", &ButtonOnSelect);
+	
+    elements[15] = CreateUIElementButton((Rectangle){10 ,310, 90, 90}, "16", &ButtonOnSelect);
+    elements[16] = CreateUIElementButton((Rectangle){110 ,310, 90, 90}, "17", &ButtonOnSelect);
+    elements[17] = CreateUIElementButton((Rectangle){210 ,310, 90, 90}, "18", &ButtonOnSelect);
+    elements[18] = CreateUIElementButton((Rectangle){310, 310, 90, 90}, "19", &ButtonOnSelect);
+    elements[19] = CreateUIElementButton((Rectangle){410, 310, 90, 90}, "20", &ButtonOnSelect);
+	
+    elements[20] = CreateUIElementButton((Rectangle){10 ,410, 90, 90}, "21", &ButtonOnSelect);
+    elements[21] = CreateUIElementButton((Rectangle){110 ,410, 90, 90}, "22", &ButtonOnSelect);
+    elements[22] = CreateUIElementButton((Rectangle){210 ,410, 90, 90}, "23", &ButtonOnSelect);
+    elements[23] = CreateUIElementButton((Rectangle){310, 410, 90, 90}, "24", &ButtonOnSelect);
+    elements[24] = CreateUIElementButton((Rectangle){410, 410, 90, 90}, "25", &ButtonOnSelect);
+	
+	elements[1].isEmpty = true;
+	elements[2].isEmpty = true;
+	elements[6].isEmpty = true;
+	elements[8].isEmpty = true;
+	elements[14].isEmpty = true;
+	elements[18].isEmpty = true;
+	elements[19].isEmpty = true;
+    menus[4] = CreateGridMenu(elements, (Vector2){5,5});
 }
 
 void NextMenu()
 {
 	menuindex++;
-	if (menuindex == 4)
+	if (menuindex == menucount)
 		menuindex = 0;
 }

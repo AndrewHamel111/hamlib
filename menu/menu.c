@@ -66,7 +66,7 @@ Menu CreateMenu(UIElement* elements, unsigned char sz)
     menu.elements = _elements;
 	menu._sz = sz;
     menu.index = 0;
-    menu.wraps = true;
+    menu.wrapbehaviour = MW_WRAP;
 	menu.isGridMenu = false;
 	
 	menu.lastindex = 0;
@@ -91,7 +91,7 @@ Menu CreateGridMenu(UIElement* elements, Vector2 sz)
     menu.elements = _elements;
     menu.sz = sz;
     menu.index = 0;
-    menu.wraps = true;
+    menu.wrapbehaviour = MW_WRAP;
 	menu.isGridMenu = true;
 	
 	menu.lastindex = 0;
@@ -104,28 +104,74 @@ Menu CreateGridMenu(UIElement* elements, Vector2 sz)
 void ClampMenuIndex(Menu* menu)
 {
 	if (menu->index >= menu->_sz)
-		menu->index = (menu->wraps) ? 0 : (menu->_sz - 1);
+		menu->index = (menu->wrapbehaviour == MW_WRAP) ? 0 : (menu->_sz - 1);
 	else if (menu->index < 0)
-		menu->index = (menu->wraps) ? (menu->_sz - 1) : 0;
+		menu->index = (menu->wrapbehaviour == MW_WRAP) ? (menu->_sz - 1) : 0;
 }
 
 void ClampMenuGrid(Menu* menu, Vector2 d)
 {
 	if (menu->index >= menu->_sz)
-		menu->index = (menu->wraps) ? (menu->index % menu->_sz) : menu->_sz - 1;
+		menu->index = ((menu->wrapbehaviour & MW_WRAP) == MW_WRAP) ? (menu->index % menu->_sz) : menu->_sz - 1;
 	else if (menu->index < 0)
-		menu->index = (menu->wraps) ? menu->_sz + menu->index : 0;
+		menu->index = ((menu->wrapbehaviour & MW_WRAP) == MW_WRAP) ? menu->_sz + menu->index : 0;
 
-	// if land on an empty square recursive call to apply the input again
-	while(menu->elements[menu->index].isEmpty && !((d.x == 0) && (d.y == 0)))
+	// removes the "michaela behaviour"
+	if (((menu->wrapbehaviour & MW_WRAP) == MW_WRAP))
 	{
-    	signed char flat_d = d.x + (d.y * menu->sz.x);
-		menu->index += flat_d;
+		if (!(menu->index % (char)(menu->sz.x)) && (d.x > 0))
+		{
+			if (menu->index == 0)
+				menu->index = menu->_sz - menu->sz.x;
+			else
+				menu->index -= menu->sz.x;
+		}
+		else if (!((menu->index + 1) % (char)(menu->sz.x)) && (d.x < 0))
+		{
+			if (menu->index == (menu->_sz - 1))
+				menu->index = menu->sz.x - 1;
+			else
+				menu->index += menu->sz.x;
+		}
+	}
 
+	if (menu->wrapbehaviour == MW_WRAP)
+	{
+		// escape empty elements
+		while(menu->elements[menu->index].isEmpty && !((d.x == 0) && (d.y == 0)))
+		{
+			signed char flat_d = d.x + (d.y * menu->sz.x);
+			menu->index += flat_d;
+
+			if (menu->index >= menu->_sz)
+				menu->index = menu->index % menu->_sz;
+			else if (menu->index < 0)
+				menu->index = menu->_sz + menu->index;
+		}
+	}
+	else if (((menu->wrapbehaviour & MW_RISE) == MW_RISE) || ((menu->wrapbehaviour & MW_FALL) == MW_FALL))
+	{
+		signed char step = ((menu->wrapbehaviour & MW_RISE) == MW_RISE) ? (-menu->sz.x) : (menu->sz.x);
+		signed char esc = 0; // attempted steps. if we loop around the entire menu we will just abandon the input
+		while(menu->elements[menu->index].isEmpty && (++esc < (signed char)(1.15f * menu->sz.y)))
+		{
+			menu->index += step;
+		}
+
+		if (esc >= (signed char)(1.15f * menu->sz.y))
+		{
+			// undo the input that got us here
+			signed char flat_d = d.x + (d.y * menu->sz.x);
+			flat_d *= -1;
+			menu->index += flat_d;
+		}
+	}
+	else if (menu->wrapbehaviour == MW_NONE)
+	{
 		if (menu->index >= menu->_sz)
-			menu->index = (menu->wraps) ? (menu->index % menu->_sz) : menu->_sz - 1;
+			menu->index = menu->_sz - 1;
 		else if (menu->index < 0)
-			menu->index = (menu->wraps) ? menu->_sz + menu->index : 0;
+			menu->index = 0;
 	}
 }
 

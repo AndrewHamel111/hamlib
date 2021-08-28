@@ -28,13 +28,18 @@ typedef struct UIElement
     
 } UIElement;
 
+typedef enum MenuWrapBehaviour
+{
+	MW_WRAP = 1, MW_FALL = 2, MW_RISE = 4, MW_NONE = 8
+} MenuWrapBehaviour;
+
 typedef struct Menu
 {
     UIElement* elements;
     Vector2 sz;
     unsigned char _sz;
     signed char index;
-    bool wraps;
+    MenuWrapBehaviour wrapbehaviour;
 
 	bool isGridMenu;
 
