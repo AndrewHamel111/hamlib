@@ -85,7 +85,6 @@ void UpdateMenu(Menu* menu)
 	buttonpressed[BUTTON_A] = IsKeyPressed(KEY_SEMICOLON);
 	
 	sc d = (sc)(buttonpressed[BUTTON_DOWN] || buttonpressed[BUTTON_RIGHT]) - (sc)(buttonpressed[BUTTON_UP] || buttonpressed[BUTTON_LEFT]);
-	
 
 	// check for mouse navigation
 	bool flag = false;
