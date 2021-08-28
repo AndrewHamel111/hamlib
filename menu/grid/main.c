@@ -30,7 +30,6 @@ int main(void)
 	
 	InitWindow(400, 240, "Menus Demo"); // create window
     SetTargetFPS(50);
-	SetExitKey(-1);
 
     bool buttonPressed[BUTTONS_LENGTH] = {false}; // see enum BUTTONS
     
@@ -74,7 +73,7 @@ int main(void)
 ////// UPDATE
 //////--------------------------------------------------------------------------------------
 		
-        UpdateMenu(&menu, GetInputVector(buttonPressed), buttonPressed[BUTTON_A]);
+        UpdateMenu(&menu);
         
 //////--------------------------------------------------------------------------------------
 ////// DRAW
