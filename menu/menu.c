@@ -21,6 +21,7 @@ UIElement CreateUIElementButton(Rectangle rectangle, char* msg, void (*func)(voi
     element.highlightedColor = (Color){255,220,255,255};
 	
 	element.isEmpty = false;
+	element.nav = (UIElementNav){-1, -1, -1, -1};
     
     return element;
 }
@@ -213,6 +214,8 @@ void UpdateMenu(Menu* menu)
 
 		if(flat_d != 0)
 		{
+			UIElement e = menu->elements[menu->index];
+
 			menu->mousedisengaged = false;
 			menu->currentindexsetbymouse = false;
 			if (menu->index == -1)
@@ -220,12 +223,35 @@ void UpdateMenu(Menu* menu)
 				menu->index = menu->lastindex + flat_d;
 				ClampMenuGrid(menu, d);
 			}
-			else
+			else 
 			{
 				menu->lastindex = menu->index;
-				menu->index += flat_d;
-				ClampMenuGrid(menu, d);
+				if (HasCustomNav(e))
+				{
+					if ((e.nav.left > -1) && (d.x < 0))
+					{
+						menu->index = e.nav.left;
+					}
+					else if ((e.nav.right > -1) && (d.x > 0))
+					{
+						menu->index = e.nav.right;
+					}
+					else if ((e.nav.up > -1) && (d.y < 0))
+					{
+						menu->index = e.nav.up;
+					}
+					else if ((e.nav.down > -1) && (d.y > 0))
+					{
+						menu->index = e.nav.down;
+					}
+				}
+				else
+				{
+					menu->index += flat_d;
+					ClampMenuGrid(menu, d);
+				}
 			}
+
 		}
 	} // grid case
 	else
@@ -311,4 +337,37 @@ UIElement* ElementRefAt(Menu menu, int x, int y)
 	}
 	else
 		return menu.elements;
+}
+
+void SetNavUp(UIElement* e, signed char i)
+{
+	UIElementNav n = e->nav;
+	n.up = i;
+	e->nav = n;
+}
+
+void SetNavRight(UIElement* e, signed char i)
+{
+	UIElementNav n = e->nav;
+	n.right = i;
+	e->nav = n;
+}
+
+void SetNavDown(UIElement* e, signed char i)
+{
+	UIElementNav n = e->nav;
+	n.down = i;
+	e->nav = n;
+}
+
+void SetNavLeft(UIElement* e, signed char i)
+{
+	UIElementNav n = e->nav;
+	n.left = i;
+	e->nav = n;
+}
+
+bool HasCustomNav(UIElement e)
+{
+	return ((e.nav.down > -1) || (e.nav.up > -1)) || ((e.nav.left > -1) || (e.nav.right > -1));
 }

@@ -15,6 +15,19 @@ and                 UIElement* ElementRefAt(Menu menu, int x, int y)
 can be used to navigate the list.
 */
 
+/**
+ * \brief A struct that contains override data for menu navigation. Specify indices for any of the components to override where navigating OFF a specific element leads.
+ * \details Every UIElement has a UIElementNav struct with -1 for all values. When a value is set, for example left, the user navigating left of this element will lead to the specified index.
+ * These values are meaningless without the context of a menu, but then again such is the case for UIElements in general.
+ */
+typedef struct UIElementNav
+{
+	signed char right;
+	signed char down;
+	signed char left;
+	signed char up;
+} UIElementNav;
+
 typedef struct UIElement
 {
     Rectangle rectangle;
@@ -25,7 +38,7 @@ typedef struct UIElement
     Color highlightedColor;
     
     bool isEmpty; // used to manage 2D menus properly
-    
+    UIElementNav nav;
 } UIElement;
 
 typedef enum MenuWrapBehaviour
@@ -100,5 +113,11 @@ UIElement ElementAt(Menu, int, int);
  * \brief Returns a reference to the element at the specified x, y position
  */
 UIElement* ElementRefAt(Menu, int, int);
+
+void SetNavUp(UIElement*, signed char);
+void SetNavRight(UIElement*, signed char);
+void SetNavDown(UIElement*, signed char);
+void SetNavLeft(UIElement*, signed char);
+bool HasCustomNav(UIElement);
 
 #endif
