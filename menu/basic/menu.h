@@ -24,6 +24,10 @@ typedef struct Menu
     unsigned char sz;
     signed char index;
     bool wraps;
+
+	signed char lastindex;
+	bool currentindexsetbymouse;
+	bool mousedisengaged;
 } Menu;
 
 // UIElement Functions

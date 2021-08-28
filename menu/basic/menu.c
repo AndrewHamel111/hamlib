@@ -22,7 +22,7 @@ UIElement CreateUIElementButton(Rectangle rectangle, char* msg, void (*func)(voi
     element.color = (Color){255,255,255,255};
     element.textColor = (Color){15,15,15,255};
     element.highlightedColor = (Color){220,220,220,255};
-    
+
     return element;
 }
 
@@ -59,6 +59,11 @@ Menu CreateMenu(UIElement* elements, int elementCount)
     menu.sz = elementCount;
     menu.index = 0;
     menu.wraps = true;
+	
+	menu.lastindex = 0;
+	menu.currentindexsetbymouse = false;
+	menu.mousedisengaged = false;
+
     return menu;
 }
 
@@ -80,19 +85,52 @@ void UpdateMenu(Menu* menu)
 	buttonpressed[BUTTON_A] = IsKeyPressed(KEY_SEMICOLON);
 	
 	sc d = (sc)(buttonpressed[BUTTON_DOWN] || buttonpressed[BUTTON_RIGHT]) - (sc)(buttonpressed[BUTTON_UP] || buttonpressed[BUTTON_LEFT]);
+	
 
-    // confirm takes priority over menu navigation
-    if (buttonpressed[BUTTON_B] || buttonpressed[BUTTON_A])
-    {
-        (*(menu->elements[menu->index].onSelect))();
-    }
-    else
-    {
-		//menu->index += (sc)(buttonpressed[BUTTON_DOWN] || buttonpressed[BUTTON_RIGHT]) ;
-		//menu->index -= (sc)(buttonpressed[BUTTON_UP] || buttonpressed[BUTTON_LEFT]) ;
-		menu->index += d;
+	// check for mouse navigation
+	bool flag = false;
+	for(char i = 0; i < menu->sz; i++)
+	{
+		if (CheckCollisionPointRec(GetMousePosition(), (menu->elements[i]).rectangle))
+		{
+			menu->lastindex = menu->index;
+			menu->index = i;
+			menu->currentindexsetbymouse = true;
+			menu->mousedisengaged = false;
+			flag = true;
+			d = 0;
+		}
+	}
 
-		ClampMenuIndex(menu);
+	if (!flag && menu->currentindexsetbymouse)
+	{
+		menu->mousedisengaged = true;
+		menu->index = -1;
+	}
+
+	if(d != 0)
+	{
+		menu->mousedisengaged = false;
+		menu->currentindexsetbymouse = false;
+		if (menu->index == -1)
+		{
+			menu->index = menu->lastindex + d;
+			ClampMenuIndex(menu);
+		}
+		else
+		{
+			menu->lastindex = menu->index;
+			menu->index += d;
+			ClampMenuIndex(menu);
+		}
+	}
+	
+    if (buttonpressed[BUTTON_B] || buttonpressed[BUTTON_A] || IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+    {
+		if (menu->index != -1)
+        	(*(menu->elements[menu->index].onSelect))();
+		else
+			menu->index = menu->lastindex;
     }
 }
 
