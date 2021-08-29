@@ -56,6 +56,7 @@ void DrawUIElement(UIElement element, bool isSelected)
 Menu CreateMenu(UIElement* elements, unsigned char sz)
 {
     Menu menu;
+	menu._sz = sz;
     
     // reallocate the elements data so that after calling CreateMenu the original list is freed automatically.
     UIElement* _elements = (UIElement*)malloc(sizeof(UIElement) * (menu._sz));
@@ -258,6 +259,8 @@ void UpdateMenu(Menu* menu)
 	{ // linear case
 		signed char d = (signed char)(buttonpressed[BUTTON_DOWN] || buttonpressed[BUTTON_RIGHT]) - (signed char)(buttonpressed[BUTTON_UP] || buttonpressed[BUTTON_LEFT]);
 
+		Vector2 v_d = (Vector2){(signed char)buttonpressed[BUTTON_RIGHT] - (signed char)buttonpressed[BUTTON_LEFT], (signed char)buttonpressed[BUTTON_DOWN] - (signed char)buttonpressed[BUTTON_UP]};
+
 		// check for mouse navigation
 		bool flag = false;
 		for(char i = 0; i < menu->_sz; i++)
@@ -281,6 +284,8 @@ void UpdateMenu(Menu* menu)
 
 		if(d != 0)
 		{
+			UIElement e = menu->elements[menu->index];
+
 			menu->mousedisengaged = false;
 			menu->currentindexsetbymouse = false;
 			if (menu->index == -1)
@@ -288,11 +293,33 @@ void UpdateMenu(Menu* menu)
 				menu->index = menu->lastindex + d;
 				ClampMenuIndex(menu);
 			}
-			else
+			else 
 			{
 				menu->lastindex = menu->index;
-				menu->index += d;
-				ClampMenuIndex(menu);
+				if (HasCustomNav(e))
+				{
+					if ((e.nav.left > -1) && (v_d.x < 0))
+					{
+						menu->index = e.nav.left;
+					}
+					else if ((e.nav.right > -1) && (v_d.x > 0))
+					{
+						menu->index = e.nav.right;
+					}
+					else if ((e.nav.up > -1) && (v_d.y < 0))
+					{
+						menu->index = e.nav.up;
+					}
+					else if ((e.nav.down > -1) && (v_d.y > 0))
+					{
+						menu->index = e.nav.down;
+					}
+				}
+				else
+				{
+					menu->index += d;
+					ClampMenuIndex(menu);
+				}
 			}
 		}
 	} // linear case
@@ -365,6 +392,11 @@ void SetNavLeft(UIElement* e, signed char i)
 	UIElementNav n = e->nav;
 	n.left = i;
 	e->nav = n;
+}
+
+void SetNav(UIElement* e, signed char right, signed char down, signed char left, signed char up)
+{
+	e->nav = (UIElementNav){right, down, left, up};
 }
 
 bool HasCustomNav(UIElement e)

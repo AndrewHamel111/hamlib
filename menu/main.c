@@ -16,7 +16,7 @@ enum BUTTONS
 // UIElement handlers
 void ButtonOnSelect();
 
-#define menucount 5
+#define menucount 6
 Menu menus[menucount];
 unsigned char menuindex = 0;
 
@@ -175,6 +175,29 @@ void InitMenus()
 	elements[18].isEmpty = true;
 	elements[19].isEmpty = true;
     menus[4] = CreateGridMenu(elements, (Vector2){5,5});
+
+	// nav override menu
+	elements = (UIElement*)malloc(sizeof(UIElement) * 5);
+	Rectangle rect = (Rectangle){300, 25, 200, 100};
+	elements[0] = CreateUIElementButton(rect, "1", &ButtonOnSelect);
+	rect.x = 50;
+	rect.y = 200;
+	elements[1] = CreateUIElementButton(rect, "2", &ButtonOnSelect);
+	rect.x = 550;
+	elements[2] = CreateUIElementButton(rect, "3", &ButtonOnSelect);
+	rect.x = 100;
+	rect.y = 350;
+	elements[3] = CreateUIElementButton(rect, "4", &ButtonOnSelect);
+	rect.x = 500;
+	elements[4] = CreateUIElementButton(rect, "5", &ButtonOnSelect);
+	menus[5] = CreateMenu(elements, 5);
+	UIElement* e = menus[5].elements;
+	SetNav(e + 0, 2, 1, 1, -1);
+	SetNav(e + 1, 2, 3, 2, 0);
+	SetNav(e + 2, 1, 4, 1, 0);
+	SetNav(e + 3, 4, -1, 4, 1);
+	SetNav(e + 4, 3, -1, 3, 2);
+	menus[5].wrapbehaviour = MW_NONE;
 }
 
 void NextMenu()

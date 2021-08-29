@@ -118,6 +118,7 @@ void SetNavUp(UIElement*, signed char);
 void SetNavRight(UIElement*, signed char);
 void SetNavDown(UIElement*, signed char);
 void SetNavLeft(UIElement*, signed char);
+void SetNav(UIElement*, signed char, signed char, signed char, signed char);
 bool HasCustomNav(UIElement);
 
 #endif
