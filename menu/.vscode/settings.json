@@ -1,0 +1,7 @@
+{
+	"files.associations": {
+		"hamlib.h": "c",
+		"raylib.h": "c",
+		"microgame_names.h": "c"
+	}
+}

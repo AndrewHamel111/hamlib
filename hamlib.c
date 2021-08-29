@@ -12,6 +12,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 void DrawTextAligned(const char* text, int posX, int posY, int fontSize, Color color, enum TEXT_ALIGNMENT alignment)
 {
@@ -173,6 +174,45 @@ void shufflerange(void* array, int count, int sizeOf, int start, int end)
 	end = CLAMP(end, 0, count - 1);
 
 	shuffle(array + start, end - start + 1, sizeOf);
+}
+
+void setintvalues(int* array, int count, ...)
+{
+	va_list list;
+	va_start(list, count);
+
+	for(int i = 0; i < count; i++)
+	{
+		array[i] = va_arg(list, int);
+	}
+
+	va_end(list);
+}
+
+void setcharvalues(unsigned char* array, unsigned char count, ...)
+{
+	va_list list;
+	va_start(list, count);
+
+	for(unsigned char i = 0; i < count; i++)
+	{
+		array[i] = (unsigned char)(va_arg(list, int));
+	}
+
+	va_end(list);
+}
+
+void setfloatvalues(float* array, int count, ...)
+{
+	va_list list;
+	va_start(list, count);
+
+	for(int i = 0; i < count; i++)
+	{
+		array[i] = (float)(va_arg(list, double));
+	}
+
+	va_end(list);
 }
 
 /////////////

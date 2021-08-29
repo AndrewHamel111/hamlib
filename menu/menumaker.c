@@ -80,26 +80,21 @@ void ButtonOnSelect()
 
 void InitMenu()
 {
-	// main menu
+	// playmenu
     UIElement* elements = (UIElement*)malloc(sizeof(UIElement) * 5);
-	elements[0] = CreateUIElementButton((Rectangle){100, 100, 600, 300}, "PLAY", &ButtonOnSelect);
-	elements[1] = CreateUIElementButton((Rectangle){100, 500, 600, 200}, "GARAGE", &ButtonOnSelect);
-	elements[2] = CreateUIElementButton((Rectangle){800, 150, 300, 150}, "LOCKED", &ButtonOnSelect);
-	elements[3] = CreateUIElementButton((Rectangle){800, 350, 300, 150}, "OPTIONS", &ButtonOnSelect);
-	elements[4] = CreateUIElementButton((Rectangle){800, 550, 300, 150}, "CREDITS", &ButtonOnSelect);
-	/* sprite example with npatch
-	Texture2D spr = LoadTexture("button.png");
-	elements[0].sprite = spr;
-	elements[0].nfo = (NPatchInfo){PureSource(spr), 36, 36, 36, 36, 0};
-	elements[0].drawmode = DM_NINESLICE | DM_TEXT;
-	elements[0].textColor = WHITE;
-	*/
+	int w = 266, h = 200;
+	elements[0] = CreateUIElementButton((Rectangle){100, 150, w, h}, "LEVEL ONE", &ButtonOnSelect);
+	elements[1] = CreateUIElementButton((Rectangle){466, 150, w, h}, "CLASS CLOWN", &ButtonOnSelect);
+	elements[2] = CreateUIElementButton((Rectangle){832, 150, w, h}, "AFTER-SCHOOL\nSPECIAL", &ButtonOnSelect);
+	elements[3] = CreateUIElementButton((Rectangle){284, 450, w, h}, "HEAD CHEF", &ButtonOnSelect);
+	elements[4] = CreateUIElementButton((Rectangle){650, 450, w, h}, "CUSTOMER\nSERVICES", &ButtonOnSelect);
+	elements[0].fontsize = elements[1].fontsize = elements[2].fontsize = elements[3].fontsize = elements[4].fontsize = 30;
 	menu = CreateMenu(elements, 5);
 	menu.wrapbehaviour = MW_NONE;
 	//						->   V  <-  ^
-	SetNav(menu.elements + 0, 2, 1, 2, 1);
-	SetNav(menu.elements + 1, 4, 0, 4, 0);
-	SetNav(menu.elements + 2, 0, 3, 0, 4);
-	SetNav(menu.elements + 3, 0, 4, 0, 2);
-	SetNav(menu.elements + 4, 1, 2, 1, 3);
+	SetNav(menu.elements + 0, 1, 3, -1, -1);
+	SetNav(menu.elements + 1, 2, 3, 0, -1);
+	SetNav(menu.elements + 2, -1, 4, 1, -1);
+	SetNav(menu.elements + 3, 4, -1, 0, 1);
+	SetNav(menu.elements + 4, 2, -1, 3, 1);
 }

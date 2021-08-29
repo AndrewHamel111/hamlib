@@ -213,6 +213,31 @@ void shuffle(void* array, int count, int sizeOf);
  */
 void shufflerange(void* array, int count, int sizeOf, int start, int end);
 
+/**
+ * \brief Sets the first [count] values of [array] to the values specified in [...]
+ * 
+ * \param array Pointer to array
+ * \param count Number of values
+ * \param ... Values to be set
+ */
+void setintvalues(int* array, int count, ...);
+/**
+ * \brief Sets the first [count] values of [array] to the values specified in [...]
+ * 
+ * \param array Pointer to array
+ * \param count Number of values
+ * \param ... Values to be set
+ */
+void setcharvalues(unsigned char* array, unsigned char count, ...);
+/**
+ * \brief Sets the first [count] values of [array] to the values specified in [...]
+ * 
+ * \param array Pointer to array
+ * \param count Number of values
+ * \param ... Values to be set
+ */
+void setfloatvalues(float* array, int count, ...);
+
 /////////////
 // DRAWING //
 /////////////
