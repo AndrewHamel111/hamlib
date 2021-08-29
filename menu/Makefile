@@ -152,6 +152,9 @@ MAKEFILE_PARAMS = $(PROJECT_NAME)
 all: 
 	$(MAKE) $(MAKEFILE_PARAMS)
 
+menumaker: menumaker.o menu.o
+	$(CC) -o MenuMaker$(EXT) menumaker.o menu.o $(HAMLIB_PATH)/hamlib.o $(CFLAGS) $(INCLUDE_PATHS) $(LDFLAGS) $(LDLIBS) -D$(PLATFORM)
+
 %.o: %.c
 	$(CC) -c $< -o $@ $(CFLAGS) $(INCLUDE_PATHS) -D$(PLATFORM)
 

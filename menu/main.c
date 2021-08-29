@@ -199,10 +199,3 @@ void InitMenus()
 	SetNav(e + 4, 3, -1, 3, 2);
 	menus[5].wrapbehaviour = MW_NONE;
 }
-
-void NextMenu()
-{
-	menuindex++;
-	if (menuindex == menucount)
-		menuindex = 0;
-}

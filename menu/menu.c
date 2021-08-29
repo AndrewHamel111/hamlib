@@ -1,6 +1,9 @@
 #include "menu.h"
+#include "hamlib.h"
 #include <stdlib.h>
 #include <string.h>
+
+// TODO brew some coffee and unify much of the code in UpdateMenu
 
 #define BUTTONS_LENGTH 6
 enum BUTTONS
@@ -14,12 +17,17 @@ UIElement CreateUIElementButton(Rectangle rectangle, char* msg, void (*func)(voi
     UIElement element;
     element.rectangle = rectangle;
     strcpy(element.msg, msg);
+	element.fontsize = -1;
     element.onSelect = func;
     
     element.color = (Color){255,255,255,255};
     element.textColor = (Color){15,15,15,255};
     element.highlightedColor = (Color){255,220,255,255};
 	
+	// sprite uninitialized
+	element.drawmode = DM_RECT | DM_TEXT;
+	element.highlightmode = HM_COLOR;
+
 	element.isEmpty = false;
 	element.nav = (UIElementNav){-1, -1, -1, -1};
     
@@ -48,9 +56,29 @@ void SetUIElementBehaviour(UIElement* element, void (*func)(void))
 void DrawUIElement(UIElement element, bool isSelected)
 {
 	if (element.isEmpty) return;
+
+	Color color = (isSelected && (element.highlightmode == HM_COLOR)) ? (element.highlightedColor) : (element.color);
+	Texture2D sprite = (isSelected && (element.highlightmode == HM_SPRITESWAP)) ? element.highlightedsprite : element.sprite;
 	
-    DrawRectangleRec(element.rectangle, isSelected ? element.highlightedColor : element.color);
-    DrawText(element.msg, element.rectangle.x + 5, element.rectangle.y + 5, element.rectangle.height/2, element.textColor);
+	if ((element.drawmode & DM_RECT) == DM_RECT)
+	{
+    	DrawRectangleRec(element.rectangle, color);
+	}
+	
+	if ((element.drawmode & DM_NINESLICE) == DM_NINESLICE)
+	{
+		DrawTextureNPatch(sprite, element.nfo, element.rectangle, (Vector2){0,0}, 0.0f, color);
+	}
+	else if ((element.drawmode & DM_SPRITE) == DM_SPRITE)
+	{
+		DrawTexturePro(sprite, PureSource(sprite), element.rectangle, GetCenter(element.rectangle), 0.0f, color);
+	}
+
+	if ((element.drawmode & DM_TEXT) == DM_TEXT)
+	{
+		Vector2 v = GetCenter(element.rectangle);
+		DrawTextAligned(element.msg, v.x, v.y, (element.fontsize > 0) ? (element.fontsize) : (element.rectangle.height/3), element.textColor, TA_CENTER | TA_MIDDLE);
+	}
 }
 
 Menu CreateMenu(UIElement* elements, unsigned char sz)
@@ -185,6 +213,8 @@ void UpdateMenu(Menu* menu)
 	buttonpressed[BUTTON_RIGHT] = IsKeyPressed(KEY_D);
 	buttonpressed[BUTTON_B] = IsKeyPressed(KEY_L);
 	buttonpressed[BUTTON_A] = IsKeyPressed(KEY_SEMICOLON);
+
+	bool confirm = buttonpressed[BUTTON_A] || buttonpressed[BUTTON_B] || IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
 	
 	if (menu->isGridMenu)
 	{ // grid case
@@ -215,14 +245,36 @@ void UpdateMenu(Menu* menu)
 
 		if(flat_d != 0)
 		{
-			UIElement e = menu->elements[menu->index];
+			UIElement e = menu->elements[(menu->index == -1) ? menu->lastindex : menu->index];
 
 			menu->mousedisengaged = false;
 			menu->currentindexsetbymouse = false;
 			if (menu->index == -1)
 			{
-				menu->index = menu->lastindex + flat_d;
-				ClampMenuGrid(menu, d);
+				if (HasCustomNav(e))
+				{
+					if ((e.nav.left > -1) && (d.x < 0))
+					{
+						menu->index = e.nav.left;
+					}
+					else if ((e.nav.right > -1) && (d.x > 0))
+					{
+						menu->index = e.nav.right;
+					}
+					else if ((e.nav.up > -1) && (d.y < 0))
+					{
+						menu->index = e.nav.up;
+					}
+					else if ((e.nav.down > -1) && (d.y > 0))
+					{
+						menu->index = e.nav.down;
+					}
+				}
+				else
+				{
+					menu->index = menu->lastindex + flat_d;
+					ClampMenuGrid(menu, d);
+				}
 			}
 			else 
 			{
@@ -284,14 +336,36 @@ void UpdateMenu(Menu* menu)
 
 		if(d != 0)
 		{
-			UIElement e = menu->elements[menu->index];
+			UIElement e = menu->elements[(menu->index == -1) ? menu->lastindex : menu->index];
 
 			menu->mousedisengaged = false;
 			menu->currentindexsetbymouse = false;
 			if (menu->index == -1)
 			{
-				menu->index = menu->lastindex + d;
-				ClampMenuIndex(menu);
+				if (HasCustomNav(e))
+				{
+					if ((e.nav.left > -1) && (v_d.x < 0))
+					{
+						menu->index = e.nav.left;
+					}
+					else if ((e.nav.right > -1) && (v_d.x > 0))
+					{
+						menu->index = e.nav.right;
+					}
+					else if ((e.nav.up > -1) && (v_d.y < 0))
+					{
+						menu->index = e.nav.up;
+					}
+					else if ((e.nav.down > -1) && (v_d.y > 0))
+					{
+						menu->index = e.nav.down;
+					}
+				}
+				else
+				{
+					menu->index = menu->lastindex + d;
+					ClampMenuIndex(menu);
+				}
 			}
 			else 
 			{
@@ -324,12 +398,10 @@ void UpdateMenu(Menu* menu)
 		}
 	} // linear case
 
-    if (buttonpressed[BUTTON_B] || buttonpressed[BUTTON_A] || IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+    if (confirm)
     {
 		if (menu->index != -1)
         	(*(menu->elements[menu->index].onSelect))();
-		else
-			menu->index = menu->lastindex;
     }
 }
 

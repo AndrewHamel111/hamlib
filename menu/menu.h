@@ -28,16 +28,35 @@ typedef struct UIElementNav
 	signed char up;
 } UIElementNav;
 
+typedef enum ElementDrawMode
+{
+	DM_SPRITE = 1, DM_RECT = 2, DM_TEXT = 4, DM_NINESLICE = 8
+} ElementDrawMode;
+
+typedef enum ElementHighlightMode
+{
+	HM_COLOR, HM_SPRITESWAP
+} ElementHighlightMode;
+
 typedef struct UIElement
 {
     Rectangle rectangle;
     char msg[64];
+	signed char fontsize;
     void (*onSelect)(void);
     Color color;
     Color textColor;
     Color highlightedColor;
+
+	Texture2D sprite;
+
+	ElementDrawMode drawmode;
+	NPatchInfo nfo;
+
+	ElementHighlightMode highlightmode;
+	Texture2D highlightedsprite;
     
-    bool isEmpty; // used to manage 2D menus properly
+    bool isEmpty;
     UIElementNav nav;
 } UIElement;
 
