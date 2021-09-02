@@ -68,7 +68,7 @@ endif
 
 # Define compiler flags:
 CFLAGS += -Wall -std=c99 -D_DEFAULT_SOURCE -Wno-missing-braces -Wunused-result
-CFLAGS += -Wextra -Wmissing-prototypes -Wstrict-prototypes
+CFLAGS += -Wextra -Wmissing-prototypes -Wstrict-prototypes -Wno-varargs
 
 ifeq ($(PLATFORM),PLATFORM_DESKTOP)
     ifeq ($(PLATFORM_OS),LINUX)
