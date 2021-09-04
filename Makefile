@@ -1,12 +1,18 @@
 .PHONY: all clean
 
-# Define required raylib variables
-PROJECT_NAME       ?= Microgames
-SOURCE_FILES	= hamlib.c
+SUBDIRS	= utility particles ui drawing
+SUBDIRS := $(addprefix src/, $(SUBDIRS))
+# SOURCE_FILES = $(wildcard $(SUBDIRS)/*.c)
+
+SOURCE_FILES = $(wildcard src/utility/*.c)
+SOURCE_FILES += $(wildcard src/particles/*.c)
+SOURCE_FILES += $(wildcard src/ui/*.c)
+SOURCE_FILES += $(wildcard src/drawing/*.c)
 
 RAYLIB_VERSION     ?= 3.8.0
 PLATFORM           ?= PLATFORM_DESKTOP
 DESTDIR ?= /usr/local
+HAMLIB_PATH = C:/Users/thelu/Documents/Projects/hamlib
 RAYLIB_INSTALL_PATH ?= $(DESTDIR)/lib
 RAYLIB_H_INSTALL_PATH ?= $(DESTDIR)/include
 RAYLIB_LIBTYPE        ?= STATIC
@@ -33,9 +39,14 @@ endif
 ifeq ($(PLATFORM),PLATFORM_DESKTOP)
     ifeq ($(PLATFORM_OS),LINUX)
         RAYLIB_PATH    = /home/thelu/raylib/raylib
+		HAMLIB_PATH	= /home/thelu/projects/hamlib
     endif
     ifeq ($(PLATFORM_OS),WINDOWS)
-	RAYLIB_PATH 	= C:\raylib\raylib
+		RAYLIB_PATH 	= C:\raylib\raylib
+    endif
+    ifeq ($(PLATFORM_OS),OSX)
+    	RAYLIB_PATH = /usr/local/raylib
+		HAMLIB_PATH = /Users/hamel111/Documents/GitHub/hamlib
     endif
 endif
 
@@ -95,6 +106,8 @@ ifeq ($(PLATFORM),PLATFORM_DESKTOP)
     endif
 endif
 
+INCLUDE_PATHS += -I$(HAMLIB_PATH)/include
+
 # Define library paths containing required libs.
 LDFLAGS = -L. -L$(RAYLIB_RELEASE_PATH) -L$(RAYLIB_PATH)/src
 
@@ -138,12 +151,16 @@ ifeq ($(PLATFORM),PLATFORM_WEB)
 endif
 
 # Define all object files required
+# OBJS = $(addsuffix /%.o, $(SUBDIRS))
 OBJS = $(patsubst %.c, %.o, $(SOURCE_FILES))
-MAKEFILE_PARAMS = hamlib.o
+MAKEFILE_PARAMS = hamlib.a
 
 # Default target entry
 all: 
 	$(MAKE) $(MAKEFILE_PARAMS)
+
+hamlib.a: $(OBJS)
+	ar -cvq libhamlib.a $(OBJS)
 
 %.o: %.c
 	$(CC) -c $< -o $@ $(CFLAGS) $(INCLUDE_PATHS) -D$(PLATFORM)
@@ -152,15 +169,15 @@ all:
 clean:
 ifeq ($(PLATFORM),PLATFORM_DESKTOP)
     ifeq ($(PLATFORM_OS),WINDOWS)
-		rm *.o *.exe
+		rm $(OBJS)
     endif
     ifeq ($(PLATFORM_OS),LINUX)
 		find . -type f -executable -delete
-		rm -fv *.o
+		rm -fv $(OBJS)
     endif
     ifeq ($(PLATFORM_OS),OSX)
 		find . -type f -perm +ugo+x -delete
-		rm -f *.o
+		rm -f $(OBJS)
     endif
 endif
 ifeq ($(PLATFORM),PLATFORM_WEB)

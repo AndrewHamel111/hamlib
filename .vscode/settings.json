@@ -3,5 +3,6 @@
 		"*.m": "c",
 		"raylib.h": "c",
 		"string.h": "c"
-	}
+	},
+	"C_Cpp.errorSquiggles": "Disabled"
 }

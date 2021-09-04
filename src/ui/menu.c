@@ -1,5 +1,14 @@
-#include "menu.h"
+/**
+ * \file menu.c
+ * \author Andrew Hamel (me@andrewhamel.ca)
+ * \date 2021-09-03
+ * 
+ * @copyright Copyright (c) 2021
+ */
+
 #include "hamlib.h"
+#include "hamlib/menu.h"
+
 #include <stdlib.h>
 #include <string.h>
 

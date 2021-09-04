@@ -1,5 +1,3 @@
-#ifndef HAMLIB_H_
-#define HAMLIB_H_
 /**
  * \file hamlib.h
  * \author Andrew Hamel (me@andrewhamel.ca)
@@ -10,7 +8,11 @@
  * @copyright Copyright (c) 2021
  */
 
+#ifndef HAMLIB_H_
+#define HAMLIB_H_
+
 #include "raylib.h"
+#include "hamlib/particle.h"
 
 // macros
 /** \brief Square of a value. */
@@ -25,6 +27,10 @@
 #define CLAMP(T,A,B) ( (T) < (A) ? (A) : ( (T > B) ? (B) : (T) ) )
 /** \brief Similar to Clamp, but when T Exceeds B it returns to A and vice versa. */
 #define CYCLE(T,A,B) ( (T) < (A) ? (B) : ( (T > B) ? (A) : (T) ) )
+
+/////////////
+// DRAWING //
+/////////////
 
 /**
  * \brief An enum used to determine text alignment.
@@ -54,9 +60,64 @@ enum TEXT_ALIGNMENT
  */
 void DrawTextAligned(const char* text, int posX, int posY, int fontSize, Color color, enum TEXT_ALIGNMENT alignment);
 
-////////////////////
-// MATH UTILITIES //
-////////////////////
+/**
+ * \brief Draws a texture using DrawTexturePro.
+ * 
+ * \param texture Texture to draw
+ * \param pos Position to draw at
+ * \param scaling X and Y scaling to use
+ */
+void DrawTextureScaled(Texture2D texture, Vector2 pos, Vector2 scaling, Color color);
+
+/**
+ * \brief Generates a random color
+ * 
+ * \return A Random Color
+ */
+Color randomcolor(void);
+
+/** \fn Color tintcolor(Color color, float amount)
+* Tints a color by a normalized amount.
+* \param color Color to be tinted.
+* \param amount Normalized value. 0.0f returns color, 1.0f returns WHITE or BLACK.
+* \returns Tinted color.
+*/
+Color tintcolor(Color color, float amount);
+
+///////////////
+// PARTICLES //
+///////////////
+
+// TODO create a particle system
+void CreateParticle(Particle p);
+void UpdateParticles(float frametime);
+void DrawParticles(void);
+
+////////
+// UI //
+////////
+
+/**
+ * \brief A function for a mouse-based button.
+ * 
+ * \param rect Rectangle describing the button
+ * \param color Color the button should be drawn in.
+ * \return true when the mouse is highlighting the button.
+ */
+bool Button(Rectangle rect, Color color);
+
+/**
+ * \brief A function for a mouse-based button.
+ * 
+ * \param rect Rectangle describing the button
+ * \param color Color the button should be drawn in. When highlighted this color is also tinted.
+ * \return true when the mouse is highlighting the button.
+ */
+bool ButtonTintable(Rectangle rect, Color color);
+
+/////////////
+// UTILITY //
+/////////////
 
 /**
  * \brief Determine if a Vector lands in a Region.
@@ -133,10 +194,6 @@ bool VecEq(Vector2 a, Vector2 b);
  */
 Vector2 GetCenter(Rectangle rect);
 
-////////////////
-// UTITLITIES //
-////////////////
-
 /**
  * \brief Swaps two objects in-place.
  * \details The caller should specify the two pointers, followed by a call to sizeof and one of the objects.
@@ -147,51 +204,6 @@ Vector2 GetCenter(Rectangle rect);
  * \param sizeOf sizeOf objects to be swapped.
  */
 void swap(void* a, void* b, int sizeOf);
-
-///////////
-// COLOR //
-///////////
-
-/**
- * \brief Generates a random color
- * 
- * \return A Random Color
- */
-Color randomcolor(void);
-
-/** \fn Color tintcolor(Color color, float amount)
-* Tints a color by a normalized amount.
-* \param color Color to be tinted.
-* \param amount Normalized value. 0.0f returns color, 1.0f returns WHITE or BLACK.
-* \returns Tinted color.
-*/
-Color tintcolor(Color color, float amount);
-
-/////////////
-// BUTTONS //
-/////////////
-
-/**
- * \brief A function for a mouse-based button.
- * 
- * \param rect Rectangle describing the button
- * \param color Color the button should be drawn in.
- * \return true when the mouse is highlighting the button.
- */
-bool Button(Rectangle rect, Color color);
-
-/**
- * \brief A function for a mouse-based button.
- * 
- * \param rect Rectangle describing the button
- * \param color Color the button should be drawn in. When highlighted this color is also tinted.
- * \return true when the mouse is highlighting the button.
- */
-bool ButtonTintable(Rectangle rect, Color color);
-
-////////////
-// ARRAYS //
-////////////
 
 /**
  * \brief A primitive shuffle algorithm. srand() must be set for good results.
@@ -221,6 +233,7 @@ void shufflerange(void* array, int count, int sizeOf, int start, int end);
  * \param ... Values to be set
  */
 void setintvalues(int* array, int count, ...);
+
 /**
  * \brief Sets the first [count] values of [array] to the values specified in [...]
  * 
@@ -237,23 +250,6 @@ void setcharvalues(unsigned char* array, unsigned char count, ...);
  * \param ... Values to be set
  */
 void setfloatvalues(float* array, int count, ...);
-
-/////////////
-// DRAWING //
-/////////////
-
-/**
- * \brief Draws a texture using DrawTexturePro.
- * 
- * \param texture Texture to draw
- * \param pos Position to draw at
- * \param scaling X and Y scaling to use
- */
-void DrawTextureScaled(Texture2D texture, Vector2 pos, Vector2 scaling, Color color);
-
-////////////////////////////
-// RECTANGLES AND VECTORS //
-////////////////////////////
 
 /**
  * \brief Returns a Source Rectangle of the full texture.
