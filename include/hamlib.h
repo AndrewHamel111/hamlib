@@ -267,6 +267,13 @@ void setcharvalues(unsigned char* array, unsigned char count, ...);
 void setfloatvalues(float* array, int count, ...);
 
 /**
+ * \brief Frees the specified memory only if it is not already null. 
+ * \return true If the memory was non-null and a free occurred. 
+ * \return false If the memory was null.
+ */
+bool smartfree(void* ptr);
+
+/**
  * \brief Returns a Source Rectangle of the full texture.
  * \details Used best for functions like DrawTexturePro that require a source rectangle even when you don't necessarily need it, for example, for non-atlassed sprites.
  * \param texture The texture to get a pure source from. 

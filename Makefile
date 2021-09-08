@@ -176,7 +176,7 @@ ifeq ($(PLATFORM),PLATFORM_DESKTOP)
     endif
     ifeq ($(PLATFORM_OS),OSX)
 		find . -type f -perm +ugo+x -delete
-		rm -f $(OBJS)
+		rm -f $(OBJS) libhamlib.a
     endif
 endif
 ifeq ($(PLATFORM),PLATFORM_WEB)

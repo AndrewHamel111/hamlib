@@ -79,3 +79,12 @@ void setfloatvalues(float* array, int count, ...)
 
 	va_end(list);
 }
+
+bool smartfree(void* ptr)
+{
+	if (ptr == NULL)
+		return false;
+
+	free(ptr);
+	return true;
+}
