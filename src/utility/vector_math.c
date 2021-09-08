@@ -48,6 +48,11 @@ Vector2 GetCenter(Rectangle rect)
 	return (Vector2){rect.x + rect.width/2, rect.y + rect.height/2};
 }
 
+Vector2 GetCenterRelative(Rectangle rect)
+{
+	return (Vector2){rect.width/2, rect.height/2};
+}
+
 Rectangle PureSource(Texture2D texture)
 {
 	return (Rectangle){0, 0, texture.width, texture.height};

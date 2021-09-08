@@ -2,7 +2,6 @@
 
 SUBDIRS	= utility particles ui drawing
 SUBDIRS := $(addprefix src/, $(SUBDIRS))
-# SOURCE_FILES = $(wildcard $(SUBDIRS)/*.c)
 
 SOURCE_FILES = $(wildcard src/utility/*.c)
 SOURCE_FILES += $(wildcard src/particles/*.c)
@@ -169,7 +168,7 @@ hamlib.a: $(OBJS)
 clean:
 ifeq ($(PLATFORM),PLATFORM_DESKTOP)
     ifeq ($(PLATFORM_OS),WINDOWS)
-		rm $(OBJS)
+		rm $(OBJS) libhamlib.a
     endif
     ifeq ($(PLATFORM_OS),LINUX)
 		find . -type f -executable -delete

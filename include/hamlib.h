@@ -8,6 +8,13 @@
  * @copyright Copyright (c) 2021
  */
 
+/*  // TODO //
+
+- Move draw.h concepts from microgame madness into draw/ src folder. Some should be in global hamlib.h, others in a specialized hamlib/scaled_draw.h
+- Make use of unions to expand the definition of UIElement while also simplifying it
+
+*/
+
 #ifndef HAMLIB_H_
 #define HAMLIB_H_
 
@@ -38,7 +45,7 @@
  * i.e. TA_CENTER | TA_BOTTOM will have the text centered horizontally but
  * draw upward from posY.
  */
-enum TEXT_ALIGNMENT
+typedef enum
 {
 	TA_LEFT = 1, /** Horizontal Alignment - all text right of posX */
 	TA_CENTER = 2, /** Horizontal Alignment - centered on posX */
@@ -46,7 +53,7 @@ enum TEXT_ALIGNMENT
 	TA_TOP = 8, /** Vertical Alignment - all text below posY */
 	TA_MIDDLE = 16, /** Vertical Alignment - Centered on posY*/
 	TA_BOTTOM = 32 /** Vertical Alignment - all text above posY*/
-};
+} TEXT_ALIGNMENT;
 
 /**
  * \brief Draws text with the specified alignment.
@@ -58,7 +65,7 @@ enum TEXT_ALIGNMENT
  * \param color Color of the text.
  * \param alignment Enum value describing the text alignment. Use | to specify a horizontal and vertical alignment.
  */
-void DrawTextAligned(const char* text, int posX, int posY, int fontSize, Color color, enum TEXT_ALIGNMENT alignment);
+void DrawTextAligned(const char* text, int posX, int posY, int fontSize, Color color, TEXT_ALIGNMENT alignment);
 
 /**
  * \brief Draws a texture using DrawTexturePro.
@@ -193,6 +200,14 @@ bool VecEq(Vector2 a, Vector2 b);
  * \return Vector2 Vector at the center of the object
  */
 Vector2 GetCenter(Rectangle rect);
+
+/**
+ * \brief Get the Center of the Rectangle relative to the top-left corner
+ * 
+ * \param rect Rectangle describing object bounds
+ * \return Vector2 Vector at the center of the object assuming object is at origin
+ */
+Vector2 GetCenterRelative(Rectangle rect);
 
 /**
  * \brief Swaps two objects in-place.

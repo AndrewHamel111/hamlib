@@ -8,7 +8,7 @@
 
 #include "hamlib.h"
 
-void DrawTextAligned(const char* text, int posX, int posY, int fontSize, Color color, enum TEXT_ALIGNMENT alignment)
+void DrawTextAligned(const char* text, int posX, int posY, int fontSize, Color color, TEXT_ALIGNMENT alignment)
 {
 	// no cases for TA_LEFT and TA_TOP as this is default behaviour in raylib.
 	int x = posX, y = posY;
