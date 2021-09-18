@@ -287,14 +287,13 @@ void setcharvalues(unsigned char* array, unsigned char count, ...);
 void setfloatvalues(float* array, int count, ...);
 
 /**
-<<<<<<< Updated upstream
  * \brief Frees the specified memory only if it is not already null. 
  * \return true If the memory was non-null and a free occurred. 
  * \return false If the memory was null.
  */
 bool smartfree(void* ptr);
-=======
- * \brief Returns either 1 or -1
+
+/** \brief Returns either 1 or -1
  */
 int randsign(void);
 
@@ -322,7 +321,6 @@ void increasebyf(float* f, float r);
  * \brief Increase the magnitude of f by r.
  */
 void increasebyi(int* f, int r);
->>>>>>> Stashed changes
 
 /**
  * \brief Returns a Source Rectangle of the full texture.
