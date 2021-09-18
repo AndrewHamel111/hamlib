@@ -2,7 +2,9 @@
 	"files.associations": {
 		"*.m": "c",
 		"raylib.h": "c",
-		"string.h": "c"
+		"string.h": "c",
+		"stdlib.h": "c",
+		"alarm_func.h": "c"
 	},
-	"C_Cpp.errorSquiggles": "Disabled"
+	"C_Cpp.errorSquiggles": "Enabled"
 }

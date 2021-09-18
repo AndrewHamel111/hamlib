@@ -46,3 +46,15 @@ Color tintcolor(Color color, float amount)
 		return (Color){color.r, color.g, del, 255};
 	}
 }
+
+Color fadecolor(Color color, float amount)
+{
+	amount = CLAMP(amount, 0, 1);
+	return (Color){color.r, color.g, color.b, LERP(color.a, 0, amount)};
+}
+
+Color lerpcolor(Color c1, Color c2, float t)
+{
+	t = CLAMP(t, 0, 1);
+	return (Color){LERP(c1.r, c2.r, t), LERP(c1.g, c2.g, t), LERP(c1.b, c2.b, t), LERP(c1.a, c2.a, t)};
+}

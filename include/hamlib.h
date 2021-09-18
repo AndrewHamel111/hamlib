@@ -91,6 +91,25 @@ Color randomcolor(void);
 */
 Color tintcolor(Color color, float amount);
 
+/**
+ * \brief Fades a color by a normalized amount.
+ * 
+ * \param color Color to be faded.
+ * \param amount 
+ * \return Color Normalized value. 0.0f returns color, 1.0f returns a color with alpha of ZERO.
+ */
+Color fadecolor(Color color, float amount);
+
+/**
+ * \brief Linearly interpolates from one color to another.
+ * 
+ * \param c1 First color
+ * \param c2 Second color
+ * \param t Normalized float (0 <= t <= 1)
+ * \return c1 when t == 0, c2 when t == 1 
+ */
+Color lerpcolor(Color c1, Color c2, float t);
+
 ///////////////
 // PARTICLES //
 ///////////////
@@ -99,6 +118,7 @@ Color tintcolor(Color color, float amount);
 void CreateParticle(Particle p);
 void UpdateParticles(float frametime);
 void DrawParticles(void);
+void DestroyAllParticles(void);
 
 ////////
 // UI //
@@ -267,11 +287,42 @@ void setcharvalues(unsigned char* array, unsigned char count, ...);
 void setfloatvalues(float* array, int count, ...);
 
 /**
+<<<<<<< Updated upstream
  * \brief Frees the specified memory only if it is not already null. 
  * \return true If the memory was non-null and a free occurred. 
  * \return false If the memory was null.
  */
 bool smartfree(void* ptr);
+=======
+ * \brief Returns either 1 or -1
+ */
+int randsign(void);
+
+/**
+ * \brief Returns either 1.0f or -1.0f
+ */
+float randsignf(void);
+
+/**
+ * \brief Reduce approaches zero
+ */
+void reducebyf(float*,float);
+
+/**
+ * \brief Reduce approaches zero
+ */
+void reducebyi(int*,int);
+
+/**
+ * \brief Increase the magnitude of f by r.
+ */
+void increasebyf(float* f, float r);
+
+/**
+ * \brief Increase the magnitude of f by r.
+ */
+void increasebyi(int* f, int r);
+>>>>>>> Stashed changes
 
 /**
  * \brief Returns a Source Rectangle of the full texture.

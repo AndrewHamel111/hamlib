@@ -231,7 +231,7 @@ void UpdateMenu(Menu* menu)
 
 		// check for mouse navigation
 		bool flag = false;
-		for(char i = 0; i < menu->_sz; i++)
+		for(int i = 0; i < menu->_sz; i++)
 		{
 			if (CheckCollisionPointRec(GetMousePosition(), (menu->elements[i]).rectangle) && !((menu->elements[i]).isEmpty))
 			{
@@ -324,7 +324,7 @@ void UpdateMenu(Menu* menu)
 
 		// check for mouse navigation
 		bool flag = false;
-		for(char i = 0; i < menu->_sz; i++)
+		for(int i = 0; i < menu->_sz; i++)
 		{
 			if (CheckCollisionPointRec(GetMousePosition(), (menu->elements[i]).rectangle))
 			{

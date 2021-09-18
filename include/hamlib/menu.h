@@ -96,7 +96,7 @@ UIElement CreateUIElementButton(Rectangle, char*, void (*func)(void));
 /**
  * \brief Create a Empty UI Element object
  */
-UIElement CreateEmptyUIElement();
+UIElement CreateEmptyUIElement(void);
 /**
  * \brief Set the colors of the UIElement
  */

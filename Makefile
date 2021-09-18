@@ -78,7 +78,8 @@ endif
 
 # Define compiler flags:
 CFLAGS += -Wall -std=c99 -D_DEFAULT_SOURCE -Wno-missing-braces -Wunused-result
-CFLAGS += -Wextra -Wmissing-prototypes -Wstrict-prototypes -Wno-varargs
+CFLAGS += -Wextra -Wmissing-prototypes -Wno-varargs
+# -Wstrict-prototypes is the worst
 
 ifeq ($(PLATFORM),PLATFORM_DESKTOP)
     ifeq ($(PLATFORM_OS),LINUX)
@@ -162,7 +163,7 @@ hamlib.a: $(OBJS)
 	ar -cvq libhamlib.a $(OBJS)
 
 %.o: %.c
-	$(CC) -c $< -o $@ $(CFLAGS) $(INCLUDE_PATHS) -D$(PLATFORM)
+	$(CC) -c $< -o $@ $(CFLAGS) $(INCLUDE_PATHS) -D$(PLATFORM) $(EXTRAPARAMS)
 
 # Clean everything
 clean:
