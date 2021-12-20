@@ -1,85 +1,89 @@
+/* TODO
+** - consider an "animation registry" similar to alarm registry. for now each drawanim requires passing the GetFrameTime() to advance animations
+*/
+
 #ifndef ANIMATION_H_
 #define ANIMATION_H_
 
-#include "raylib.h"
-#include "hamlib/alarm_registry.h"
+#include "sprite.h"
 
-typedef enum animation_info
+enum SpriteAnimationType
 {
-	ANIM_SPRITE, ANIM_TRANSFORM, ANIM_FIELD
-} animation_info;
+	SAT_ONCE, SAT_LOOPED, SAT_PING_PONG, SAT_PING_PONG_ONCE, SAT_LOOPED_N, SAT_PING_PONG_N
+};
 
-typedef enum animation_field_info
+typedef struct _SpriteAnimation
 {
-	FLOAT, INT, VECTOR2
-} animation_field_info;
+	Sprite* sprites;
+	int sprites_length;
+	int frames_per_second;
+	enum SpriteAnimationType animation_type;
+	int loop_count;
 
-typedef enum animation_play_type
-{
-	APT_ONESHOT, APT_LOOP, APT_PINGPONG
-} animation_play_type;
+	// PRIVATE
+	float _seconds_on_frame;
+	int _frame_current;
+	float _seconds_per_frame;
+	bool _playing;
+	bool _ping_pong_reverse;
+	int _loops_left;
 
-typedef struct animation
-{
-	animation_info info; /** SPRITE, TRANSFORM, FIELD */
-	animation_play_type play_type; /** APT_* */
-	float animation_period;
-	bool playing;
-	float time;
-	union 
-	{
-		struct
-		{
-			Texture2D spritesheet;
-			unsigned short frame;
-			unsigned short frames;
-		};
-		struct
-		{
-			// TODO implement
-			Vector2* pos;
-			Vector2* size;
-			Vector2* rotation;
-		};
-		struct
-		{
-			// TODO implement
-			animation_field_info field_info;
-			union 
-			{
-				struct
-				{
-					float* targetf;
-				};
-				struct
-				{
-					int* targeti;
-				};
-				struct
-				{
-					Vector2* targetv;
-				};
-			};
-			
-		};
-	};
-	
-} animation;
+} SpriteAnimation;
 
-animation createspriteanimation(Texture2D spritesheet, unsigned short frames, float animation_period);
-void playanimation(animation* anim);
-void stopanimation(animation* anim);
-void drawanimation(animation* anim, Vector2 pos, float frametime);
-void drawanimationpro(animation* anim, Rectangle dest, Vector2 origin, float rotation, Color tint);
+/**
+ * \brief Every call to DrawSpriteAnimation__ must perform these actions first, to maintain the animation state.
+ */
+void DrawSpriteAnimationBase(float frametime, SpriteAnimation* animation);
 
-Rectangle animationrect(animation anim);
+/**
+ * \brief SpriteAnimation constructor from minimum fields.
+ * 
+ * \param sprites_length no. of frames in animation
+ * \param sprites array of sprites corresponding to the animation
+ * \param frames_per_second frames per second of the animation
+ * \return SpriteAnimation 
+ */
+SpriteAnimation NewAnimation(int sprites_length, Sprite sprites[], int frames_per_second);
+/**
+ * \brief Set the animations framerate. Sets invalid values to 1.
+ * 
+ * \return SpriteAnimation modified animation
+ */
+SpriteAnimation ChangeAnimationFramerate(SpriteAnimation* animation, int frames_per_second);
 
-typedef struct animator
-{
-	animation* animations;
-	unsigned char animations_count;
-	unsigned char animation_current;
-	bool is_playing;
-} animator;
+/**
+ * \brief Set the value of N for N loop styles.
+ */
+SpriteAnimation SetSpriteAnimationLoops(SpriteAnimation* animation, int loop_count, bool usePingPong);
+
+/**
+ * \brief Draws the current sprite of the animation. If the animation is not playing, it will simply draw the "locked" frame of the animation until Reset/Start/Stop are called.
+ */
+void DrawSpriteAnimation(float frametime, SpriteAnimation* animation, int posX, int posY, Color tint);
+/**
+ * \brief Draws the current sprite of the animation. If the animation is not playing, it will simply draw the "locked" frame of the animation until Reset/Start/Stop are called.
+ */
+void DrawSpriteAnimationV(float frametime, SpriteAnimation* animation, Vector2 position, Color tint);
+/**
+ * \brief Draws the current sprite of the animation. If the animation is not playing, it will simply draw the "locked" frame of the animation until Reset/Start/Stop are called.
+ */
+void DrawSpriteAnimationPro(float frametime, SpriteAnimation* animation, Rectangle dest, Vector2 origin, float rotation, Color tint);
+
+/**
+ * \brief Reset all runtime values of SpriteAnimation except _playing.
+ */
+void SpriteAnimationReset(SpriteAnimation* animation);
+/**
+ * \brief Sets _playing = false.
+ */
+void SpriteAnimationStop(SpriteAnimation* animation);
+/**
+ * \brief Sets _playing = true.
+ */
+void SpriteAnimationResume(SpriteAnimation* animation);
+/**
+ * \brief Calls ResetAnimation, then ResumeAnimation.
+ */
+void SpriteAnimationStart(SpriteAnimation* animation);
 
 #endif

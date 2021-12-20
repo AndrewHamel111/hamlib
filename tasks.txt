@@ -1,6 +1,4 @@
-- rename all old references to animation as OLD_ and rename TMP_animation to spriteanimation.
-
-- make drawtextaligned support multi line strings
+- Implement TA_MIDDLE case for DrawTextAligned
 - decide how to handle MAINT_RATIO && !SameRatio case in scaled_draw.c
 
 IDEAS
@@ -10,3 +8,4 @@ IDEAS
 
 CONCERNS
 - GetCenterRelative and GetCenter have the wrong names, since GetCenterRelative actually returns the Global center of the rectangle and GetCenter just returns a vector with width and height / 2.
+- A function called DrawTextureScaled exists and is confusing considering we already have ScaledDrawTexture and they do very different things.

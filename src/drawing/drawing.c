@@ -8,8 +8,69 @@
 
 #include "hamlib.h"
 
+#include <string.h>
+#include <stdlib.h>
+
+void DrawMultilineTextAligned(const char* text, int posX, int posY, int fontSize, Color color, TEXT_ALIGNMENT alignment);
+
+void DrawMultilineTextAligned(const char* text, int posX, int posY, int fontSize, Color color, TEXT_ALIGNMENT alignment)
+{
+	// TODO implement TA_MIDDLE case
+	int len = TextLength(text);
+	int lineCount = 0; // really 1 less line than total lines but that's okay because 0 lines means no offset
+
+	int j = 0;
+	while(text[j] != '\0')
+		if (text[j++] == '\n')
+			lineCount++;
+
+	bool bott = (alignment & TA_BOTTOM);
+	int currentLine = bott ? lineCount : 0;
+
+	int leftendpoint = -1, rightendpoint = -1;
+	char* tmp_text;
+	for(int i = 0; i < len + 1; i++)
+	{
+		if (text[i] == '\0' || text[i] == '\n')
+		{
+			leftendpoint = rightendpoint;
+			rightendpoint = i;
+
+			tmp_text = (char*)malloc(sizeof(char) * (rightendpoint - leftendpoint));
+			strncpy(tmp_text, text + leftendpoint + 1, rightendpoint - leftendpoint - 1);
+			tmp_text[rightendpoint - leftendpoint - 1] = '\0';
+
+			DrawTextAligned(tmp_text, posX, posY + (fontSize * currentLine * (bott ? -1 : 1)), fontSize, color, alignment);
+			currentLine += (bott) ? -1 : 1;
+
+			free(tmp_text);
+
+			if (text[i] == '\0')
+				break;
+		}
+	}
+}
+
 void DrawTextAligned(const char* text, int posX, int posY, int fontSize, Color color, TEXT_ALIGNMENT alignment)
 {
+	int len = TextLength(text);
+
+	// Find out if we need to use the multiline logic here
+	bool isMultiLine = false;
+	char* c;
+	c = text;
+	while(c < (text + len) && !isMultiLine)
+		if (*c == '\n')
+			isMultiLine = true;
+		else
+			c++;
+
+	if (isMultiLine)
+	{
+		DrawMultilineTextAligned(text, posX, posY, fontSize, color, alignment);
+		return;
+	}
+
 	// no cases for TA_LEFT and TA_TOP as this is default behaviour in raylib.
 	int x = posX, y = posY;
 

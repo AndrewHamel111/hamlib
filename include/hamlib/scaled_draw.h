@@ -5,7 +5,7 @@
 #include "hamlib.h"
 
 #include "hamlib/sprite.h"
-#include "hamlib/TMP_animation.h"
+#include "hamlib/animation.h"
 
 enum ScalingFlags
 {

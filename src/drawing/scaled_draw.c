@@ -14,6 +14,9 @@ void SetOriginalSize(int width, int height)
 {
 	TEMPLATE_WIDTH = width;
 	TEMPLATE_HEIGHT = height;
+
+	// provide default values to width and height to avoid divide by zero or other problems.
+	SetScalingSize(width, height);
 }
 
 void SetScalingSize(int width, int height)
