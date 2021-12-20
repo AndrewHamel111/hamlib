@@ -4,7 +4,10 @@
 		"raylib.h": "c",
 		"string.h": "c",
 		"stdlib.h": "c",
-		"alarm_func.h": "c"
+		"alarm_func.h": "c",
+		"alarm_registry.h": "c",
+		"hamlib.h": "c",
+		"particle.h": "c"
 	},
 	"C_Cpp.errorSquiggles": "Enabled"
 }

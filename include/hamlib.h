@@ -12,6 +12,7 @@
 
 - Move draw.h concepts from microgame madness into draw/ src folder. Some should be in global hamlib.h, others in a specialized hamlib/scaled_draw.h
 - Make use of unions to expand the definition of UIElement while also simplifying it
+- Consider polishing a half a dozen more features before forking hamlib into hamlib-plus-plus for future development so I can play in C++ more (for employers)
 
 */
 
@@ -28,12 +29,14 @@
 #define MIN(A,B) ((A) > (B) ? (B) : (A))
 /** \brief Maximum of two values. */
 #define MAX(A,B) ((A) < (B) ? (B) : (A))
-/** \brief Linear-Interpolation between A and B by T. */
-#define LERP(A,B,T) ((B)*(T) + (A)*(1 - T))
 /** \brief Clamps T by A and B. Identity function when A <= T <= B. */
 #define CLAMP(T,A,B) ( (T) < (A) ? (A) : ( (T > B) ? (B) : (T) ) )
 /** \brief Similar to Clamp, but when T Exceeds B it returns to A and vice versa. */
 #define CYCLE(T,A,B) ( (T) < (A) ? (B) : ( (T > B) ? (A) : (T) ) )
+/** \brief Linear-Interpolation between A and B by T. */
+#define LERP(A,B,T) ((B)*(T) + (A)*(1 - T))
+/** \brief LERP but T is clamped to 0 and 1. */
+#define LERPC(A,B,T) ((B)*(CLAMP(T,0,1)) + (A)*(1 - (CLAMP(T,0,1))))
 
 /////////////
 // DRAWING //
@@ -66,6 +69,8 @@ typedef enum
  * \param alignment Enum value describing the text alignment. Use | to specify a horizontal and vertical alignment.
  */
 void DrawTextAligned(const char* text, int posX, int posY, int fontSize, Color color, TEXT_ALIGNMENT alignment);
+
+void DrawTextAlignedPro(const char *text, Vector2 position, Vector2 origin, float rotation, float fontSize, float spacing, Color tint, TEXT_ALIGNMENT alignment);
 
 /**
  * \brief Draws a texture using DrawTexturePro.
@@ -145,6 +150,8 @@ bool ButtonTintable(Rectangle rect, Color color);
 /////////////
 // UTILITY //
 /////////////
+
+#define VECTOR_ZERO CLITERAL(Vector2){ 0, 0 }
 
 /**
  * \brief Determine if a Vector lands in a Region.
@@ -228,6 +235,54 @@ Vector2 GetCenter(Rectangle rect);
  * \return Vector2 Vector at the center of the object assuming object is at origin
  */
 Vector2 GetCenterRelative(Rectangle rect);
+
+/**
+ * \brief Offset the position of Rectangle A by Rectangle B
+ * \return Rectangle with the sum of A and Bs positions, and A's dimension.
+ */
+Rectangle RecAdd(Rectangle a, Rectangle b);
+
+/**
+ * \brief Offset the position of Rectangle A by Vector V
+ * \return Rectangle with the sum of A and Bs positions, and A's dimension.
+ */
+Rectangle RecAddVec(Rectangle a, Vector2 v);
+
+/**
+ * \brief Offset the position of Rectangle A negatively by Rectangle B
+ * \return Rectangle with the difference of A and Bs positions, and A's dimension.
+ */
+Rectangle RecDiff(Rectangle a, Rectangle b);
+
+/**
+ * \brief Scale Rectangle V's dimensions linearly by scalar float a.
+ * \return Rectangle with same position but increased size.
+ */
+Rectangle RecScale(float a, Rectangle v);
+
+/**
+ * \brief Scale Rectangle V's dimensions linearly by scalar float a, and offset the rectangle so the center appears to not have moved.
+ * \return Rectangle with same position but increased size.
+ */
+Rectangle RecScaleCenter(float a, Rectangle v);
+
+/**
+ * \brief Returns a Source Rectangle of the full texture.
+ * \details Used best for functions like DrawTexturePro that require a source rectangle even when you don't necessarily need it, for example, for non-atlassed sprites.
+ * \param texture The texture to get a pure source from. 
+ * \return Rectangle A source rectangle with x,y = 0,0 and width,height matching the image's size.
+ */
+Rectangle PureSource(Texture2D texture);
+
+/**
+ * \brief Offset the x by -width/2 and the y by -height/2.
+ */
+Rectangle CenterRect(Rectangle rectangle);
+
+/**
+ * \brief Create a Rectangle from two vectors, using the first as a position and the second as a dimension.
+ */
+Rectangle RecFromVec(Vector2 position, Vector2 size);
 
 /**
  * \brief Swaps two objects in-place.
@@ -321,13 +376,5 @@ void increasebyf(float* f, float r);
  * \brief Increase the magnitude of f by r.
  */
 void increasebyi(int* f, int r);
-
-/**
- * \brief Returns a Source Rectangle of the full texture.
- * \details Used best for functions like DrawTexturePro that require a source rectangle even when you don't necessarily need it, for example, for non-atlassed sprites.
- * \param texture The texture to get a pure source from. 
- * \return Rectangle A source rectangle with x,y = 0,0 and width,height matching the image's size.
- */
-Rectangle PureSource(Texture2D texture);
 
 #endif

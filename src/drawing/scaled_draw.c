@@ -8,14 +8,47 @@
 
 static int WIDTH;
 static int HEIGHT;
+static int FLAGS;
 
-static const int TEMPLATE_WIDTH = 1280;
-static const int TEMPLATE_HEIGHT = 720;
+static int TEMPLATE_WIDTH = 1280;
+static int TEMPLATE_HEIGHT = 720;
 
-void SetScalingParameters(int width, int height)
+void SetOriginalSize(int width, int height)
+{
+	TEMPLATE_WIDTH = width;
+	TEMPLATE_HEIGHT = height;
+}
+
+void SetScalingSize(int width, int height)
 {
 	WIDTH = width;
 	HEIGHT = height;
+}
+
+void SetScalingFlags(int flags)
+{
+	FLAGS = flags;
+}
+
+static bool SameRatio()
+{
+	return ((WIDTH / HEIGHT) == (TEMPLATE_WIDTH / TEMPLATE_HEIGHT));
+}
+
+/**
+ * \brief Scale the value according to change in WIDTH without consideration of SF_MAINT_RATIO
+ */
+static int GetScaledWidth(int x)
+{
+	return (int)((float)WIDTH * ((float)x / (float)TEMPLATE_WIDTH));
+}
+
+/**
+ * \brief Scale the value according to change in HEIGHT without consideration of SF_MAINT_RATIO
+ */
+static int GetScaledHeight(int y)
+{
+	return (int)((float)HEIGHT * ((float)y / (float)TEMPLATE_HEIGHT));
 }
 
 /**
@@ -23,7 +56,12 @@ void SetScalingParameters(int width, int height)
  */
 static int GetScaledX(int x)
 {
-	return (int)((float)WIDTH * ((float)x / (float)TEMPLATE_WIDTH));
+	if (((FLAGS & SF_MAINT_RATIO) == SF_MAINT_RATIO) && !SameRatio())
+	{
+		
+	}
+	
+	return GetScaledWidth(x);
 }
 
 /**
@@ -31,7 +69,12 @@ static int GetScaledX(int x)
  */
 static int GetScaledY(int y)
 {
-	return (int)((float)HEIGHT * ((float)y / (float)TEMPLATE_HEIGHT));
+	if (((FLAGS & SF_MAINT_RATIO) == SF_MAINT_RATIO) && !SameRatio())
+	{
+
+	}
+	
+	return GetScaledHeight(y);
 }
 
 void ScaledDrawRect(Rectangle rect, Color color)
@@ -103,4 +146,22 @@ void ScaledDrawTextVecAligned(const char* text, Vector2 pos, int fontsize, Color
 	fontsize = GetScaledY(fontsize);
 
 	DrawTextAligned(text, posX, posY, fontsize, color, alignment);
+}
+
+void ScaledDrawPoly(Vector2 center, int sides, float radius, float rotation, Color color)
+{
+	center.x = GetScaledX(center.x);
+	center.y = GetScaledY(center.y);
+	radius = MIN(GetScaledX(radius), GetScaledY(radius));
+
+	DrawPoly(center, sides, radius, rotation, color);
+}
+
+void ScaledDrawPolyLines(Vector2 center, int sides, float radius, float rotation, Color color)
+{
+	center.x = GetScaledX(center.x);
+	center.y = GetScaledY(center.y);
+	radius = (MIN(GetScaledX(radius), GetScaledY(radius)) + MAX(GetScaledX(radius), GetScaledY(radius)))/2.0f;
+
+	DrawPolyLines(center, sides, radius, rotation, color);
 }

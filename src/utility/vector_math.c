@@ -50,10 +50,52 @@ Vector2 GetCenter(Rectangle rect)
 
 Vector2 GetCenterRelative(Rectangle rect)
 {
-	return (Vector2){rect.width/2, rect.height/2};
+	return (Vector2){(int)(rect.width/2), (int)(rect.height/2)};
 }
+
+// RECTANGLE MATH //
+
+Rectangle RecAdd(Rectangle a, Rectangle b)
+{
+	return (Rectangle){a.x + b.x, a.y + b.y, a.width, a.height};
+}
+
+Rectangle RecAddVec(Rectangle a, Vector2 v)
+{
+	return (Rectangle){a.x + v.x, a.y + v.y, a.width, a.height};
+}
+
+Rectangle RecDiff(Rectangle a, Rectangle b)
+{
+	return (Rectangle){a.x - b.x, a.y - b.y, a.width, a.height};
+}
+
+Rectangle RecScale(float a, Rectangle v)
+{
+	return (Rectangle){v.x, v.y, a * v.width, a * v.height};
+}
+
+Rectangle RecScaleCenter(float a, Rectangle v)
+{
+	float xd = (v.x * a) - v.x;
+	float yd = (v.y * a) - v.y;
+
+	return (Rectangle){v.x - xd/2, v.y = yd/2, a * v.width, a * v.height};
+}
+
+// RECTANGLE OTHER OPERATIONS //
 
 Rectangle PureSource(Texture2D texture)
 {
 	return (Rectangle){0, 0, texture.width, texture.height};
+}
+
+Rectangle CenterRect(Rectangle rectangle)
+{
+	return (Rectangle){rectangle.x - rectangle.width/2, rectangle.y - rectangle.height/2, rectangle.width, rectangle.height};
+}
+
+Rectangle RecFromVec(Vector2 position, Vector2 size)
+{
+	return (Rectangle){position.x, position.y, size.x, size.y};
 }

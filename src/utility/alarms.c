@@ -1,5 +1,7 @@
 #include "hamlib/alarm_def.h"
 #include "hamlib/alarm_func.h"
+#include "hamlib/alarm_registry.h"
+#define REPEATING_ALARM_CARRIES_TIME
 
 #include <stdlib.h>
 
@@ -41,11 +43,35 @@ void ticka(alarm* _alarm, float frametime)
 	_alarm->time -= frametime;
 
 	if ((_alarm->time <= 0.0f))
+	{
+
+		float temp = _alarm->time; // save the extra negative time to add to the alarm's timer for the next loop IF the alarm loops.
 		skipa(_alarm);
+		
+		if (_alarm->repeats)
+		{
+			seta(_alarm);
+#ifdef REPEATING_ALARM_CARRIES_TIME
+			_alarm->time -= temp;
+#endif
+		}
+	}
 }
 
-// alarm registry
+alarm createalarm(float time, bool repeats)
+{
+	alarm alarm;
+	alarm.flag = false;
+	alarm.onEnd = alarm.onSet = NULL;
+	alarm.repeats = repeats;
+	alarm.time = alarm.time_initial = time;
 
+	return alarm;
+}
+
+////////////////////
+// alarm registry //
+/////.////.///./////
 alarm** registered_alarms;
 unsigned short alarms_length;
 
@@ -91,7 +117,7 @@ void unregistera(alarm* a)
 	registered_alarms = (alarm**)realloc(registered_alarms, alarms_length * sizeof(alarm*));
 }
 
-void unregisterall()
+void unregisterall(void)
 {
 	free(registered_alarms);
 	alarms_length = 0;
@@ -102,6 +128,6 @@ void tickall(float frametime)
 {
 	for (int i = 0; i < alarms_length; i++)
 	{
-		ticka(registered_alarms + i, frametime);
+		ticka(registered_alarms[i], frametime);
 	}
 }

@@ -53,15 +53,16 @@ node* Add(node* tail, void* value, int sz)
 	if ((tail->value == NULL))
 	{
 		// Consider this the creation of a list
-		printf("null tail is being converted to a list\n");
-		tail->prev = tail->next = NULL;
+		//printf("null tail is being converted to a list\n");
+		tail->prev = NULL;
+		tail->next = NULL;
 		Set(tail, value, sz);
-		printf("done\n");
+		//printf("done\n");
 		return tail;
 	}
 	else
 	{
-		printf("normal add operation\n");
+		//printf("normal add operation\n");
 		node* newnode = (node*)malloc(sizeof(node));
 		// set pointers and value
 		newnode->next = tail->next;
@@ -73,7 +74,7 @@ node* Add(node* tail, void* value, int sz)
 			tail->next->prev = newnode;
 		tail->next = newnode;
 		
-		printf("done\n");
+		//printf("done\n");
 		return newnode;
 	}
 }
@@ -122,16 +123,25 @@ node* Remove(node* _node)
 {
 	if (_node == NULL)
 	{
-		printf("node in remove is null.\n");
+		//printf("node in remove is null.\n");
 		return NULL;
 	}
 
-	printf("removing node\n");
+	//printf("removing node\n");
 
 	if (_node->prev == NULL)
 	{
-		printf("Tried to remove head using normal remove function.\n");
+		//printf("Tried to remove head using normal remove function.\n");
 		return NULL;
+	}
+	else if (_node->next == NULL)
+	{
+		// trying to remove a tail
+		node* tail = _node->prev;
+		tail->next = NULL;
+		FreeNode(_node);
+		// return new tail
+		return tail;
 	}
 	else
 	{
@@ -139,7 +149,7 @@ node* Remove(node* _node)
 		_node->next->prev = _node->prev;
 		node* temp = _node->next;
 		FreeNode(_node);
-		printf("node freed\n");
+		//printf("node freed\n");
 		return temp;
 	}
 }

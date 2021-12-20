@@ -8,6 +8,7 @@ typedef struct alarm
 	float time;
 	float time_initial;
 	bool flag;
+	bool repeats;
 	void (*onSet)(void);
 	void (*onEnd)(void);
 } alarm;

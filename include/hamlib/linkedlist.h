@@ -58,9 +58,9 @@ node* AddToTail(node* head, void* value, int sz);
 void MoveNode(node* src, node* dest);
 
 /**
- * \brief Remove the specified node. 
+ * \brief Remove the specified node.
  * \param _node 
- * \return node* to the new node at _node's index.
+ * \return node* to the new node at _node's index. If removing a tail it returns the new tail.
  */
 node* Remove(node* _node);
 

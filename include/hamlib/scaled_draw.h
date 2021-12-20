@@ -4,11 +4,27 @@
 #include "raylib.h"
 #include "hamlib.h"
 
-/** \brief Call at the start of program to initialize WIDTH and HEIGHT variables needed for scaling.
+enum ScalingFlags
+{
+	SF_MAINT_RATIO
+};
+
+/** \brief Call at the start of program to assign WIDTH and HEIGHT variables to the size of your game variables are in terms of.
 * \param width Set width of screen
 * \param height Set height of screen
 */
-void SetScalingParameters(int width, int height);
+void SetOriginalSize(int width, int height);
+
+/** \brief Call at the start of program to initialize the target width and height for the window.
+* \param width Set width of screen
+* \param height Set height of screen
+*/
+void SetScalingSize(int width, int height);
+
+/** \brief Set the scaling flags used by ScaledDraw* functions.
+ * \param flags 
+ */
+void SetScalingFlags(int flags);
 
 /**
  * \brief Draw Rectangle scaled subject to ScalingParameters
@@ -55,5 +71,15 @@ void ScaledDrawTextAligned(const char* text, int posX, int posY, int fontsize, C
  * \param alignment Use bitwise or | to combine alignment details.
  */
 void ScaledDrawTextVecAligned(const char* text, Vector2 pos, int fontsize, Color color, TEXT_ALIGNMENT alignment);
+
+/**
+ * \brief Draw Polygon scaled subject to ScalingParameters
+ */
+void ScaledDrawPoly(Vector2 center, int sides, float radius, float rotation, Color color);
+
+/**
+ * \brief Draw Polygon lines scaled subject to ScalingParameters
+ */
+void ScaledDrawPolyLines(Vector2 center, int sides, float radius, float rotation, Color color);
 
 #endif

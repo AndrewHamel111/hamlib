@@ -26,4 +26,9 @@ void skipa(alarm*);
  */
 void ticka(alarm*, float);
 
+/**
+ * \brief Initializes all values for an alarm to save values. Must manually set onSet onEnd functions after.
+ */
+alarm createalarm(float time, bool repeats);
+
 #endif
