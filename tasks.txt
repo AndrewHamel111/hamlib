@@ -1,4 +1,3 @@
-- Implement TA_MIDDLE case for DrawTextAligned
 - decide how to handle MAINT_RATIO && !SameRatio case in scaled_draw.c
 
 IDEAS

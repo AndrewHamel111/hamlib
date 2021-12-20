@@ -11,10 +11,19 @@
 #include <string.h>
 #include <stdlib.h>
 
+static bool showTextAnchors = false;
+
+void ShowTextAlignedAnchors(bool show)
+{
+	showTextAnchors = show;
+}
+
 void DrawMultilineTextAligned(const char* text, int posX, int posY, int fontSize, Color color, TEXT_ALIGNMENT alignment);
 
 void DrawMultilineTextAligned(const char* text, int posX, int posY, int fontSize, Color color, TEXT_ALIGNMENT alignment)
 {
+	// TODO consider improving the temp solution I have wherein I compute all the line positions FIRST, then just iterate over them.
+
 	// TODO implement TA_MIDDLE case
 	int len = TextLength(text);
 	int lineCount = 0; // really 1 less line than total lines but that's okay because 0 lines means no offset
@@ -24,7 +33,24 @@ void DrawMultilineTextAligned(const char* text, int posX, int posY, int fontSize
 		if (text[j++] == '\n')
 			lineCount++;
 
+	bool even = false;
+
+	if (lineCount % 2 == 0)
+	{
+		// line count is ODD
+		// variable is even but remember that actual line count is lineCount+1 therefore number of lines is ODD, so we use the full fontsize method
+		even = false;
+	}
+	else
+	{
+		even = true;
+	}
+
+	// compute line positions only necessary for debugging
+	float* linePositions = (float*)malloc(sizeof(float) * (lineCount + 1));
+
 	bool bott = (alignment & TA_BOTTOM);
+	bool mid = (alignment & TA_MIDDLE);
 	int currentLine = bott ? lineCount : 0;
 
 	int leftendpoint = -1, rightendpoint = -1;
@@ -36,11 +62,23 @@ void DrawMultilineTextAligned(const char* text, int posX, int posY, int fontSize
 			leftendpoint = rightendpoint;
 			rightendpoint = i;
 
+			// find the substring of the current line
 			tmp_text = (char*)malloc(sizeof(char) * (rightendpoint - leftendpoint));
 			strncpy(tmp_text, text + leftendpoint + 1, rightendpoint - leftendpoint - 1);
 			tmp_text[rightendpoint - leftendpoint - 1] = '\0';
 
-			DrawTextAligned(tmp_text, posX, posY + (fontSize * currentLine * (bott ? -1 : 1)), fontSize, color, alignment);
+			// posY calculation
+			int _posY;
+			_posY = posY + (fontSize * currentLine * (bott ? -1 : 1));
+			if (mid)
+			{
+				_posY -= fontSize * ((lineCount) / 2); // adjustment for the number of lines
+				if (even)
+					_posY -= (fontSize) / 2; // adjustment since an even number of lines should actually be offset by half a line
+			}
+
+			DrawTextAligned(tmp_text, posX, _posY, fontSize, color, alignment);
+			linePositions[currentLine] = _posY; // only used for debugging
 			currentLine += (bott) ? -1 : 1;
 
 			free(tmp_text);
@@ -49,6 +87,15 @@ void DrawMultilineTextAligned(const char* text, int posX, int posY, int fontSize
 				break;
 		}
 	}
+
+	if (showTextAnchors)
+	{
+		for(int i = 0; i <= lineCount; i++) // DEBUG STUFF
+				DrawCircle(posX, linePositions[i], 3, GREEN);
+		DrawCircle(posX, posY, 5, ORANGE);
+	}
+
+	free(linePositions);
 }
 
 void DrawTextAligned(const char* text, int posX, int posY, int fontSize, Color color, TEXT_ALIGNMENT alignment)

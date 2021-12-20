@@ -59,6 +59,11 @@ typedef enum
 } TEXT_ALIGNMENT;
 
 /**
+ * \brief Call with true to show green dots for multiline anchors and orange dots for text anchors.
+ */
+void ShowTextAlignedAnchors(bool show);
+
+/**
  * \brief Draws text with the specified alignment.
  * 
  * \param text Text to be drawn.
