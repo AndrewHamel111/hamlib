@@ -1,0 +1,9 @@
+- add scaled draws for Sprite
+- add centered draws for Sprite
+- add scaled draws for SpriteAnimation
+- add centered draws for SpriteAnimation
+
+IDEAS
+- sound management
+- general player data serialization
+- input manager
