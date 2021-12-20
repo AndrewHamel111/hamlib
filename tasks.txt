@@ -1,4 +1,4 @@
-- SAT_LOOPED_N
+- rename all old references to animation as OLD_ and rename TMP_animation to spriteanimation.
 
 - make drawtextaligned support multi line strings
 - decide how to handle MAINT_RATIO && !SameRatio case in scaled_draw.c
@@ -10,7 +10,3 @@ IDEAS
 
 CONCERNS
 - GetCenterRelative and GetCenter have the wrong names, since GetCenterRelative actually returns the Global center of the rectangle and GetCenter just returns a vector with width and height / 2.
-
-Removed hamlib/centered_draw
-
-These features are now only accessible through ScaledDraw

@@ -15,6 +15,7 @@
 void AddTime(SpriteAnimation* animation, float frametime);
 void AdvanceFrame(SpriteAnimation* animation);
 void AnimationUpdatePrivates(SpriteAnimation* animation);
+void NewLoop(SpriteAnimation* animation);
 
 void AddTime(SpriteAnimation* animation, float frametime)
 {
@@ -119,6 +120,55 @@ void AdvanceFrame(SpriteAnimation* animation)
 			}
 			break;
 		}
+		case SAT_LOOPED_N:
+		{
+			if (animation->_frame_current < animation->sprites_length - 1)
+				(animation->_frame_current)++;
+			else if (animation->_frame_current == animation->sprites_length - 1)
+			{
+				animation->_frame_current = 0;
+				NewLoop(animation);
+			}
+			else
+			{
+				// error case.
+#ifdef PRINT_DEBUG
+				printf("ERR: Error case in SAT_LOOPED: frame_current %d\t\n", animation->_frame_current);
+#endif
+			}
+			break;
+		}
+		case SAT_PING_PONG_N:
+		{
+			if (
+				(!animation->_ping_pong_reverse && (animation->_frame_current < animation->sprites_length - 1))
+				||
+				(animation->_ping_pong_reverse && (animation->_frame_current > 0))
+			)
+			{
+				animation->_frame_current += (animation->_ping_pong_reverse) ? -1: 1;
+			}
+			else if (
+				(!animation->_ping_pong_reverse && (animation->_frame_current >= animation->sprites_length - 1))
+				||
+				(animation->_ping_pong_reverse && (animation->_frame_current <= 0))
+			)
+			{
+				animation->_ping_pong_reverse = !animation->_ping_pong_reverse;
+				animation->_frame_current += (animation->_ping_pong_reverse) ? -1: 1;
+
+				if (!animation->_ping_pong_reverse)
+					NewLoop(animation);
+			}
+			else
+			{
+				// error case
+#ifdef PRINT_DEBUG
+				printf("ERR: Error case in SAT_PING_PONG: frame_current %d\tping_pong_reverse %d\n", animation->_frame_current, animation->_ping_pong_reverse);
+#endif
+			}
+			break;
+		}
 	}
 }
 
@@ -128,6 +178,20 @@ void AnimationUpdatePrivates(SpriteAnimation* animation)
 	if (animation->frames_per_second != 0)
 		animation->_seconds_per_frame = 1.0f/animation->frames_per_second;
 	animation->_frame_current = 0;
+}
+
+void NewLoop(SpriteAnimation* animation)
+{
+	if (animation->animation_type == SAT_LOOPED_N ||
+		animation->animation_type == SAT_PING_PONG_N)
+	{
+		animation->_loops_left--;
+		if (animation->_loops_left <= 0)
+		{
+			animation->_playing = false;
+			animation->_frame_current = 0;
+		}
+	}	
 }
 
 /// REAL FUNCTIONS ///
@@ -144,6 +208,7 @@ SpriteAnimation NewAnimation(int sprites_length, Sprite sprites[], int frames_pe
 	animation.sprites = (Sprite*)malloc(sprites_length * sizeof(Sprite));
 	animation.sprites_length = sprites_length;
 	animation.frames_per_second = frames_per_second;
+	animation.loop_count = 1;
 	for(int i = 0; i < sprites_length; i++)
 		animation.sprites[i] = sprites[i];
 
@@ -151,6 +216,7 @@ SpriteAnimation NewAnimation(int sprites_length, Sprite sprites[], int frames_pe
 	animation.animation_type = SAT_LOOPED;
 	animation._ping_pong_reverse = false;
 	animation._playing = true;
+	animation._loops_left = 0;
 
 	// compute private fields
 	AnimationUpdatePrivates(&animation);
@@ -162,6 +228,17 @@ SpriteAnimation ChangeAnimationFramerate(SpriteAnimation* animation, int frames_
 {
 	animation->frames_per_second = frames_per_second;
 	AnimationUpdatePrivates(animation);
+	return *animation;
+}
+
+SpriteAnimation SetSpriteAnimationLoops(SpriteAnimation* animation, int loop_count, bool usePingPong)
+{
+	if (usePingPong)
+		animation->animation_type = SAT_PING_PONG_N;
+	else
+		animation->animation_type = SAT_LOOPED_N;
+	animation->loop_count = loop_count;
+	animation->_loops_left = animation->loop_count;
 	return *animation;
 }
 
@@ -198,6 +275,7 @@ void SpriteAnimationReset(SpriteAnimation* animation)
 	animation->_seconds_on_frame = false;
 	animation->_ping_pong_reverse = false;
 	animation->_playing = false;
+	animation->_loops_left = animation->loop_count;
 }
 
 void SpriteAnimationStop(SpriteAnimation* animation)
