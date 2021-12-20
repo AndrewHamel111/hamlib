@@ -1,8 +1,5 @@
 #include "hamlib/scaled_draw.h"
 
-#include "raylib.h"
-#include "hamlib.h"
-
 #include <stdlib.h>
 #include <stdarg.h>
 
@@ -27,7 +24,12 @@ void SetScalingSize(int width, int height)
 
 void SetScalingFlags(int flags)
 {
-	FLAGS = flags;
+	FLAGS = FLAGS | flags;
+}
+
+void UnsetScalingFlags(int flags)
+{
+	FLAGS = FLAGS & !flags;
 }
 
 static bool SameRatio()
@@ -58,7 +60,7 @@ static int GetScaledX(int x)
 {
 	if (((FLAGS & SF_MAINT_RATIO) == SF_MAINT_RATIO) && !SameRatio())
 	{
-		
+		// TODO do something here chief!
 	}
 	
 	return GetScaledWidth(x);
@@ -71,49 +73,64 @@ static int GetScaledY(int y)
 {
 	if (((FLAGS & SF_MAINT_RATIO) == SF_MAINT_RATIO) && !SameRatio())
 	{
-
+		// TODO do something here chief!
 	}
 	
 	return GetScaledHeight(y);
 }
 
+/**
+ * \brief Scale a Vector using the X and Y scaling appropriately.
+ */
+static Vector2 GetScaledVector(Vector2 vector)
+{
+	return (Vector2){GetScaledX(vector.x), GetScaledY(vector.y)};
+}
+
+/**
+ * \brief Scale a Rectangle using X, Y, Width, and Height scaling appropriately.
+ */
+static Rectangle GetScaledRect(Rectangle rectangle)
+{
+	return (Rectangle){GetScaledX(rectangle.x), GetScaledY(rectangle.y), GetScaledWidth(rectangle.width), GetScaledHeight(rectangle.height)};
+}
+
 void ScaledDrawRect(Rectangle rect, Color color)
 {
-	rect.x = (float)GetScaledX((int)rect.x);
-	rect.y = (float)GetScaledY((int)rect.y);
-	rect.width = (float)GetScaledX((int)rect.width);
-	rect.height = (float)GetScaledY((int)rect.height);
+	if (FLAGS & SF_CENTERED)
+	{
+		rect.x -= rect.width / 2;
+		rect.y -= rect.height / 2;
+	}
+
+	// rect.x = (float)GetScaledX((int)rect.x);
+	// rect.y = (float)GetScaledY((int)rect.y);
+	// rect.width = (float)GetScaledX((int)rect.width);
+	// rect.height = (float)GetScaledY((int)rect.height);
+	rect = GetScaledRect(rect);
 
 	DrawRectangleRec(rect, color);
 }
 
-void ScaledDrawRectCentered(Rectangle rect, Color color)
+void ScaledDrawTexture(Texture2D texture, Rectangle dest, float rotation, Color color)
 {
-	rect.x -= rect.width / 2;
-	rect.y -= rect.height / 2;
-	ScaledDrawRect(rect, color);
-}
+	if (FLAGS & SF_CENTERED)
+	{
+		dest.x -= texture.width / 2;
+		dest.y -= texture.height / 2;
+	}
 
-void ScaledDrawSprite(Texture2D sprite, Rectangle dest, float rotation, Color color)
-{
-	Rectangle src = PureSource(sprite);
-	dest.x = (float)GetScaledX((int)dest.x);
-	dest.y = (float)GetScaledY((int)dest.y);
-	dest.width = (float)GetScaledX((int)dest.width);
-	dest.height = (float)GetScaledY((int)dest.height);
+	Rectangle src = PureSource(texture);
+	// dest.x = (float)GetScaledX((int)dest.x);
+	// dest.y = (float)GetScaledY((int)dest.y);
+	// dest.width = (float)GetScaledX((int)dest.width);
+	// dest.height = (float)GetScaledY((int)dest.height);
+	dest = GetScaledRect(dest);
 
 	// This adjustment is needed since we want to be able to use rotation with respect to the center of the sprite
 	Rectangle _dest = (Rectangle){GetCenter(dest).x, GetCenter(dest).y, dest.width, dest.height};
 
-	DrawTexturePro(sprite, src, _dest, GetCenterRelative(dest), rotation, color);
-}
-
-void ScaledDrawSpriteCentered(Texture2D sprite, Rectangle dest, float rotation, Color color)
-{
-	dest.x -= sprite.width / 2;
-	dest.y -= sprite.height / 2;
-
-	ScaledDrawSprite(sprite, dest, rotation, color);
+	DrawTexturePro(texture, src, _dest, GetCenterRelative(dest), rotation, color);
 }
 
 void ScaledDrawText(const char* text, int posX, int posY, int fontsize, Color color)
@@ -150,8 +167,9 @@ void ScaledDrawTextVecAligned(const char* text, Vector2 pos, int fontsize, Color
 
 void ScaledDrawPoly(Vector2 center, int sides, float radius, float rotation, Color color)
 {
-	center.x = GetScaledX(center.x);
-	center.y = GetScaledY(center.y);
+	// center.x = GetScaledX(center.x);
+	// center.y = GetScaledY(center.y);
+	center = GetScaledVector(center);
 	radius = MIN(GetScaledX(radius), GetScaledY(radius));
 
 	DrawPoly(center, sides, radius, rotation, color);
@@ -159,9 +177,78 @@ void ScaledDrawPoly(Vector2 center, int sides, float radius, float rotation, Col
 
 void ScaledDrawPolyLines(Vector2 center, int sides, float radius, float rotation, Color color)
 {
-	center.x = GetScaledX(center.x);
-	center.y = GetScaledY(center.y);
+	// center.x = GetScaledX(center.x);
+	// center.y = GetScaledY(center.y);
+	center = GetScaledVector(center);
 	radius = (MIN(GetScaledX(radius), GetScaledY(radius)) + MAX(GetScaledX(radius), GetScaledY(radius)))/2.0f;
 
 	DrawPolyLines(center, sides, radius, rotation, color);
+}
+
+void ScaledDrawSprite(Sprite sprite, int posX, int posY, Color tint)
+{
+	if (FLAGS & SF_CENTERED)
+	{
+		posX -= sprite.width/2;
+		posY -= sprite.height/2;
+	}
+
+	posX = GetScaledX(posX);
+	posY = GetScaledY(posY);
+	sprite.width = GetScaledWidth(sprite.width);
+	sprite.height = GetScaledHeight(sprite.height);
+
+	DrawSprite(sprite, posX, posY, tint);
+}
+
+void ScaledDrawSpritePro(Sprite sprite, Rectangle dest, Vector2 origin, float rotation, Color tint)
+{
+	if (FLAGS & SF_CENTERED)
+	{
+		origin = GetCenterRelative(dest);
+	}
+
+	// dest.x = GetScaledX(dest.x);
+	// dest.y = GetScaledY(dest.y);
+	// dest.width = GetScaledWidth(dest.width);
+	// dest.height = GetScaledHeight(dest.height);
+	dest = GetScaledRect(dest);
+	origin = GetScaledVector(origin);
+
+	DrawSpritePro(sprite, dest, origin, rotation, tint);
+}
+
+void ScaledDrawSpriteAnimation(float frametime, SpriteAnimation* animation, int posX, int posY, Color tint)
+{
+	Sprite sprite = animation->sprites[animation->_frame_current];
+
+	if (FLAGS & SF_CENTERED)
+	{
+		posX -= sprite.width/2;
+		posY -= sprite.height/2;
+	}
+
+	posX = GetScaledX(posX);
+	posY = GetScaledY(posY);
+	sprite.width = GetScaledWidth(sprite.width);
+	sprite.height = GetScaledHeight(sprite.height);
+
+	DrawSpriteAnimationBase(frametime, animation);
+	DrawSprite(sprite, posX, posY, tint);
+}
+
+void ScaledDrawSpriteAnimationPro(float frametime, SpriteAnimation* animation, Rectangle dest, Vector2 origin, float rotation, Color tint)
+{
+	Sprite sprite = animation->sprites[animation->_frame_current];
+
+	if (FLAGS & SF_CENTERED)
+	{
+		origin = GetCenterRelative(dest);
+	}
+
+	dest = GetScaledRect(dest);
+	origin = GetScaledVector(origin);
+
+	DrawSpriteAnimationBase(frametime, animation);
+	DrawSpritePro(sprite, dest, origin, rotation, tint);
 }

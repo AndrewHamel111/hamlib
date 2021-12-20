@@ -4,9 +4,12 @@
 #include "raylib.h"
 #include "hamlib.h"
 
+#include "hamlib/sprite.h"
+#include "hamlib/TMP_animation.h"
+
 enum ScalingFlags
 {
-	SF_MAINT_RATIO
+	SF_MAINT_RATIO, SF_CENTERED
 };
 
 /** \brief Call at the start of program to assign WIDTH and HEIGHT variables to the size of your game variables are in terms of.
@@ -26,27 +29,20 @@ void SetScalingSize(int width, int height);
  */
 void SetScalingFlags(int flags);
 
+/** \brief Unset the scaling flags used by ScaledDraw* functions.
+ * \param flags 
+ */
+void UnsetScalingFlags(int flags);
+
 /**
  * \brief Draw Rectangle scaled subject to ScalingParameters
  */
 void ScaledDrawRect(Rectangle rect, Color color);
 
 /**
- * \brief Draw Rectangle scaled subject to ScalingParameters
- * \param rect Rectangle.x, Rectangle.y describes the center of the rectangle.
- */
-void ScaledDrawRectCentered(Rectangle rect, Color color);
-
-/**
  * \brief Draw Sprite scaled subject to ScalingParameters
  */
-void ScaledDrawSprite(Texture2D sprite, Rectangle dest, float rotation, Color color);
-
-/**
- * \brief Draw Sprite scaled subject to ScalingParameters
- * \param dest Rectangle.x, Rectangle.y describes the center of the sprite.
- */
-void ScaledDrawSpriteCentered(Texture2D sprite, Rectangle dest, float rotation, Color color);
+void ScaledDrawTexture(Texture2D sprite, Rectangle dest, float rotation, Color color);
 
 /**
  * \brief Draw Text scaled subject to ScalingParameters
@@ -81,5 +77,25 @@ void ScaledDrawPoly(Vector2 center, int sides, float radius, float rotation, Col
  * \brief Draw Polygon lines scaled subject to ScalingParameters
  */
 void ScaledDrawPolyLines(Vector2 center, int sides, float radius, float rotation, Color color);
+
+/**
+ * \brief Draw Sprite scaled subject to ScalingParameters
+ */
+void ScaledDrawSprite(Sprite sprite, int posX, int posY, Color tint);
+
+/**
+ * \brief Draw Sprite scaled subject to ScalingParameters
+ */
+void ScaledDrawSpritePro(Sprite sprite, Rectangle dest, Vector2 origin, float rotation, Color tint);
+
+/**
+ * \brief Draw SpriteAnimation scaled subject to ScalingParameters
+ */
+void ScaledDrawSpriteAnimation(float frametime, SpriteAnimation* animation, int posX, int posY, Color tint);
+
+/**
+ * \brief Draw SpriteAnimation scaled subject to ScalingParameters
+ */
+void ScaledDrawSpriteAnimationPro(float frametime, SpriteAnimation* animation, Rectangle dest, Vector2 origin, float rotation, Color tint);
 
 #endif

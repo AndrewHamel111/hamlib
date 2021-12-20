@@ -7,7 +7,8 @@
 		"alarm_func.h": "c",
 		"alarm_registry.h": "c",
 		"hamlib.h": "c",
-		"particle.h": "c"
+		"particle.h": "c",
+		"sprite.h": "c"
 	},
 	"C_Cpp.errorSquiggles": "Enabled"
 }

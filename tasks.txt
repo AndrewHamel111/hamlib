@@ -1,9 +1,16 @@
-- add scaled draws for Sprite
-- add centered draws for Sprite
-- add scaled draws for SpriteAnimation
-- add centered draws for SpriteAnimation
+- SAT_LOOPED_N
+
+- make drawtextaligned support multi line strings
+- decide how to handle MAINT_RATIO && !SameRatio case in scaled_draw.c
 
 IDEAS
-- sound management
-- general player data serialization
 - input manager
+- general player data serialization
+- sound management
+
+CONCERNS
+- GetCenterRelative and GetCenter have the wrong names, since GetCenterRelative actually returns the Global center of the rectangle and GetCenter just returns a vector with width and height / 2.
+
+Removed hamlib/centered_draw
+
+These features are now only accessible through ScaledDraw

@@ -29,6 +29,11 @@ typedef struct _SpriteAnimation
 } SpriteAnimation;
 
 /**
+ * \brief Every call to DrawSpriteAnimation__ must perform these actions first, to maintain the animation state.
+ */
+void DrawSpriteAnimationBase(float frametime, SpriteAnimation* animation);
+
+/**
  * \brief SpriteAnimation constructor from minimum fields.
  * 
  * \param sprites_length no. of frames in animation

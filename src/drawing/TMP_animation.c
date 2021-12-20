@@ -15,7 +15,6 @@
 void AddTime(SpriteAnimation* animation, float frametime);
 void AdvanceFrame(SpriteAnimation* animation);
 void AnimationUpdatePrivates(SpriteAnimation* animation);
-void DrawSpriteAnimationBase(SpriteAnimation* animation, float frametime);
 
 void AddTime(SpriteAnimation* animation, float frametime)
 {
@@ -131,16 +130,13 @@ void AnimationUpdatePrivates(SpriteAnimation* animation)
 	animation->_frame_current = 0;
 }
 
-/**
- * \brief Every call to DrawSpriteAnimation__ must perform these actions first, to maintain the animation state.
- */
-void DrawSpriteAnimationBase(SpriteAnimation* animation, float frametime)
+/// REAL FUNCTIONS ///
+
+void DrawSpriteAnimationBase(float frametime, SpriteAnimation* animation)
 {
 	if (animation->_playing)
 		AddTime(animation, frametime);
 }
-
-/// REAL FUNCTIONS ///
 
 SpriteAnimation NewAnimation(int sprites_length, Sprite sprites[], int frames_per_second)
 {
@@ -191,7 +187,7 @@ void DrawSpriteAnimationV(float frametime, SpriteAnimation* animation, Vector2 p
 
 void DrawSpriteAnimationPro(float frametime, SpriteAnimation* animation, Rectangle dest, Vector2 origin, float rotation, Color tint)
 {
-	DrawSpriteAnimationBase(animation, frametime);
+	DrawSpriteAnimationBase(frametime, animation);
 	
 	DrawSpritePro(animation->sprites[animation->_frame_current], dest, origin, rotation, tint);
 }
