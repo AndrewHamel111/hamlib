@@ -12,6 +12,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define GAMEPAD_MENU_DEADZONE 0.1
+
 // TODO brew some coffee and unify much of the code in UpdateMenu
 
 #define BUTTONS_LENGTH 6
@@ -223,7 +225,30 @@ void UpdateMenu(Menu* menu)
 	buttonpressed[BUTTON_B] = IsKeyPressed(KEY_L);
 	buttonpressed[BUTTON_A] = IsKeyPressed(KEY_SEMICOLON);
 
-	bool confirm = buttonpressed[BUTTON_A] || buttonpressed[BUTTON_B] || IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
+	buttonpressed[BUTTON_A] = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
+
+	int i = 0;
+	while(IsGamepadAvailable(i))
+	{
+		buttonpressed[BUTTON_UP] |= GetGamepadAxisMovement(i, GAMEPAD_AXIS_LEFT_Y) < -GAMEPAD_MENU_DEADZONE;
+		buttonpressed[BUTTON_DOWN] |= GetGamepadAxisMovement(i, GAMEPAD_AXIS_LEFT_Y) > GAMEPAD_MENU_DEADZONE;
+		buttonpressed[BUTTON_LEFT] |= GetGamepadAxisMovement(i, GAMEPAD_AXIS_LEFT_X) < -GAMEPAD_MENU_DEADZONE;
+		buttonpressed[BUTTON_RIGHT] |= GetGamepadAxisMovement(i, GAMEPAD_AXIS_LEFT_X) > GAMEPAD_MENU_DEADZONE;
+
+		buttonpressed[BUTTON_A] |= IsGamepadButtonPressed(i, GAMEPAD_BUTTON_MIDDLE_RIGHT);
+
+		buttonpressed[BUTTON_UP] |= IsGamepadButtonPressed(i, GAMEPAD_BUTTON_LEFT_FACE_UP);
+		buttonpressed[BUTTON_DOWN] |= IsGamepadButtonPressed(i, GAMEPAD_BUTTON_LEFT_FACE_DOWN);
+		buttonpressed[BUTTON_LEFT] |= IsGamepadButtonPressed(i, GAMEPAD_BUTTON_LEFT_FACE_LEFT);
+		buttonpressed[BUTTON_RIGHT] |= IsGamepadButtonPressed(i, GAMEPAD_BUTTON_LEFT_FACE_RIGHT);
+		buttonpressed[BUTTON_B] |= IsGamepadButtonPressed(i, GAMEPAD_BUTTON_RIGHT_FACE_DOWN);
+		buttonpressed[BUTTON_A] |= IsGamepadButtonPressed(i, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT);
+
+		i++;
+	}
+
+	bool confirm = buttonpressed[BUTTON_A]; // || buttonpressed[BUTTON_B];
+	bool back = buttonpressed[BUTTON_B];
 	
 	if (menu->isGridMenu)
 	{ // grid case

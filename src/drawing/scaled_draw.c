@@ -61,9 +61,22 @@ static int GetScaledHeight(int y)
  */
 static int GetScaledX(int x)
 {
-	if (((FLAGS & SF_MAINT_RATIO) == SF_MAINT_RATIO) && !SameRatio())
+	if ((FLAGS & SF_MAINT_RATIO) && !SameRatio())
 	{
-		// TODO do something here chief!
+		// float desiredRatio = (float)TEMPLATE_WIDTH / (float)TEMPLATE_HEIGHT;
+		// if (MIN(WIDTH/TEMPLATE_WIDTH, HEIGHT/TEMPLATE_HEIGHT) == WIDTH/TEMPLATE_WIDTH)
+		// {
+
+		// }
+		// else
+		// {
+
+		// }
+
+		// // scale X by whatever Y gets scaled by
+		// float exampleY = 100;
+		// float adjustment = exampleY / GetScaledX(exampleY);
+		// return x * adjustment;
 	}
 	
 	return GetScaledWidth(x);
@@ -74,9 +87,12 @@ static int GetScaledX(int x)
  */
 static int GetScaledY(int y)
 {
-	if (((FLAGS & SF_MAINT_RATIO) == SF_MAINT_RATIO) && !SameRatio())
+	if ((FLAGS & SF_MAINT_RATIO) && !SameRatio())
 	{
-		// TODO do something here chief!
+		// // scale Y by whatever X gets scaled by
+		// float exampleX = 100;
+		// float adjustment = exampleX / GetScaledX(exampleX);
+		// return y * adjustment;
 	}
 	
 	return GetScaledHeight(y);

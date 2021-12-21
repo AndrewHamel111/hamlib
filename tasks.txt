@@ -1,3 +1,15 @@
+- improving the menus
+- test controller support
+- current menu should have a reference to a parent menu if one exists
+- improve UIElement functionality
+
+- start inputmanager
+- consider creating a dedicated event struct
+- inputmanager can raise events from keyboard and mouse input
+- inputmanager can raise events from gamepad input
+- inputmanager has a method to enable and disable different inputs including gamepad, keyboard, touch, etc.
+- BONUS inputmanager can also have external methods hooked in as inputs
+
 - decide how to handle MAINT_RATIO && !SameRatio case in scaled_draw.c
 
 IDEAS
