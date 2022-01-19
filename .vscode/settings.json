@@ -9,7 +9,8 @@
 		"hamlib.h": "c",
 		"particle.h": "c",
 		"sprite.h": "c",
-		"input.h": "c"
+		"input.h": "c",
+		"menu.h": "c"
 	},
 	"C_Cpp.errorSquiggles": "Enabled"
 }

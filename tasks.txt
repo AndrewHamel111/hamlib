@@ -1,5 +1,8 @@
+- implement tweening
+
+- revamping the menus
+-- create generic ui panels, implement a ui stack
 - improving the menus
-- test controller support
 - current menu should have a reference to a parent menu if one exists
 - improve UIElement functionality
 

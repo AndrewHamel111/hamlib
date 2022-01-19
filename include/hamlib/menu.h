@@ -145,7 +145,10 @@ void SetNavUp(UIElement*, signed char);
 void SetNavRight(UIElement*, signed char);
 void SetNavDown(UIElement*, signed char);
 void SetNavLeft(UIElement*, signed char);
-void SetNav(UIElement*, signed char, signed char, signed char, signed char);
+/**
+ * \brief Sets what element navigating FROM this element will lead to, for each direction.
+ */
+void SetNav(UIElement*, signed char right, signed char down, signed char left, signed char up);
 bool HasCustomNav(UIElement);
 
 #endif

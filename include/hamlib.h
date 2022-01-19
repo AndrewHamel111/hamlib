@@ -37,6 +37,8 @@
 #define LERP(A,B,T) ((B)*(T) + (A)*(1 - T))
 /** \brief LERP but T is clamped to 0 and 1. */
 #define LERPC(A,B,T) ((B)*(CLAMP(T,0,1)) + (A)*(1 - (CLAMP(T,0,1))))
+/** \brief Finds the Absolute Value */
+#define ABS(A) ((A < 0) ? -A : A))
 
 /////////////
 // DRAWING //
@@ -381,5 +383,13 @@ void increasebyf(float* f, float r);
  * \brief Increase the magnitude of f by r.
  */
 void increasebyi(int* f, int r);
+
+/// TWEENING ///
+
+void tween_update(float frametime);
+
+void tween_int(int* value, int start, int end, float time);
+void tween_float(float* value, float start, float end, float time);
+void tween_vector(Vector2* value, Vector2 start, Vector2 end, float time);
 
 #endif

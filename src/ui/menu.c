@@ -23,6 +23,10 @@ enum BUTTONS
 };
 static bool buttonpressed[BUTTONS_LENGTH] = {false};
 
+// WILL NEED IF I DECIDE TO ALLOW THE JOYSTICK FOR NAVIGATING THE MENU
+/** prevents the joystick from freaking out the menu logic when an input is held */
+// static bool gamepadAvailable;
+
 UIElement CreateUIElementButton(Rectangle rectangle, char* msg, void (*func)(void))
 {
     UIElement element;
@@ -230,10 +234,16 @@ void UpdateMenu(Menu* menu)
 	int i = 0;
 	while(IsGamepadAvailable(i))
 	{
+		/*
+		if (ABS(GetGamepadAxisMovement(i, GAMEPAD_AXIS_LEFT_X) > GAMEPAD_MENU_DEADZONE ||
+		ABS(GetGamepadAxisMovement(i, GAMEPAD_AXIS_LEFT_Y)) > GAMEPAD_MENU_DEADZONE)
+			gamepadAvailable = false;
+
 		buttonpressed[BUTTON_UP] |= GetGamepadAxisMovement(i, GAMEPAD_AXIS_LEFT_Y) < -GAMEPAD_MENU_DEADZONE;
 		buttonpressed[BUTTON_DOWN] |= GetGamepadAxisMovement(i, GAMEPAD_AXIS_LEFT_Y) > GAMEPAD_MENU_DEADZONE;
 		buttonpressed[BUTTON_LEFT] |= GetGamepadAxisMovement(i, GAMEPAD_AXIS_LEFT_X) < -GAMEPAD_MENU_DEADZONE;
 		buttonpressed[BUTTON_RIGHT] |= GetGamepadAxisMovement(i, GAMEPAD_AXIS_LEFT_X) > GAMEPAD_MENU_DEADZONE;
+		*/
 
 		buttonpressed[BUTTON_A] |= IsGamepadButtonPressed(i, GAMEPAD_BUTTON_MIDDLE_RIGHT);
 
@@ -241,14 +251,15 @@ void UpdateMenu(Menu* menu)
 		buttonpressed[BUTTON_DOWN] |= IsGamepadButtonPressed(i, GAMEPAD_BUTTON_LEFT_FACE_DOWN);
 		buttonpressed[BUTTON_LEFT] |= IsGamepadButtonPressed(i, GAMEPAD_BUTTON_LEFT_FACE_LEFT);
 		buttonpressed[BUTTON_RIGHT] |= IsGamepadButtonPressed(i, GAMEPAD_BUTTON_LEFT_FACE_RIGHT);
-		buttonpressed[BUTTON_B] |= IsGamepadButtonPressed(i, GAMEPAD_BUTTON_RIGHT_FACE_DOWN);
-		buttonpressed[BUTTON_A] |= IsGamepadButtonPressed(i, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT);
+		buttonpressed[BUTTON_A] |= IsGamepadButtonPressed(i, GAMEPAD_BUTTON_RIGHT_FACE_DOWN);
+		buttonpressed[BUTTON_B] |= IsGamepadButtonPressed(i, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT);
 
 		i++;
 	}
+	
 
 	bool confirm = buttonpressed[BUTTON_A]; // || buttonpressed[BUTTON_B];
-	bool back = buttonpressed[BUTTON_B];
+	//bool back = buttonpressed[BUTTON_B];
 	
 	if (menu->isGridMenu)
 	{ // grid case
