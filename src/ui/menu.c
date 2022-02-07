@@ -7,6 +7,7 @@
  */
 
 #include "hamlib.h"
+#include "hamlib/draw.h"
 #include "hamlib/menu.h"
 
 #include <stdlib.h>

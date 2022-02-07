@@ -1,4 +1,4 @@
-#include "hamlib/scaled_draw.h"
+#include "hamlib/draw.h"
 
 #include <stdlib.h>
 #include <stdarg.h>

@@ -1,5 +1,6 @@
 /* TODO
 ** - consider an "animation registry" similar to alarm registry. for now each drawanim requires passing the GetFrameTime() to advance animations
+** - Overhaul Animation to not just be an array of sprites to avoid having many copies of the same Texture2D
 */
 
 #ifndef ANIMATION_H_

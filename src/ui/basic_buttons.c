@@ -7,16 +7,17 @@
  */
 
 #include "hamlib.h"
+#include "hamlib/imgui.h"
 
 bool Button(Rectangle rect, Color color)
 {
 	DrawRectangleRec(rect, color);
-	return VectorInRectangle(GetMousePosition(), rect);
+	return CheckCollisionPointRec(GetMousePosition(), rect) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
 }
 
 bool ButtonTintable(Rectangle rect, Color color)
 {
-	bool flag = VectorInRectangle(GetMousePosition(), rect);
+	bool flag = CheckCollisionPointRec(GetMousePosition(), rect);
 	DrawRectangleRec(rect, flag ? tintcolor(color, 0.6f) : color);
-	return flag;
+	return flag && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
 }

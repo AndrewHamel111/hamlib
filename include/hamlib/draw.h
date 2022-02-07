@@ -1,12 +1,42 @@
-#ifndef SCALED_DRAW_H_
-#define SCALED_DRAW_H_
+#ifndef HAMLIB_DRAW_H_
+#define HAMLIB_DRAW_H_
 
-#include "raylib.h"
 #include "hamlib.h"
+#include "animation.h"
 
-#include "hamlib/sprite.h"
-#include "hamlib/animation.h"
+//// FROM OLD HAMLIB.H ///////////
+/**
+ * \brief Draws text with the specified alignment.
+ * 
+ * \param text Text to be drawn.
+ * \param posX X position of the text anchor.
+ * \param posY Y position of the text anchor.
+ * \param fontSize Height of the drawn text in pixels.
+ * \param color Color of the text.
+ * \param alignment Enum value describing the text alignment. Use | to specify a horizontal and vertical alignment.
+ */
+void DrawTextAligned(const char* text, int posX, int posY, int fontSize, Color color, TEXT_ALIGNMENT alignment);
 
+void DrawTextAlignedPro(const char *text, Vector2 position, Vector2 origin, float rotation, float fontSize, float spacing, Color tint, TEXT_ALIGNMENT alignment);
+
+/**
+ * \brief Draws a texture using DrawTexturePro.
+ * 
+ * \param texture Texture to draw
+ * \param pos Position to draw at
+ * \param scaling X and Y scaling to use
+ */
+void DrawTextureScaled(Texture2D texture, Vector2 pos, Vector2 scaling, Color color);
+//// FROM OLD HAMLIB.H ///////////
+
+//// FROM CENTERED_DRAW.H ///////////
+void DrawRectangleCentered(int posX, int posY, int width, int height, Color color);
+void DrawRectangleCenteredV(Vector2 position, Vector2 size, Color color);
+void DrawRectangleCenteredRec(Rectangle rectangle, Color color);
+//// FROM CENTERED_DRAW.H ///////////
+
+
+//// FROM SCALED_DRAW.H ///////////
 enum ScalingFlags
 {
 	SF_MAINT_RATIO, SF_CENTERED
@@ -97,5 +127,6 @@ void ScaledDrawSpriteAnimation(float frametime, SpriteAnimation* animation, int 
  * \brief Draw SpriteAnimation scaled subject to ScalingParameters
  */
 void ScaledDrawSpriteAnimationPro(float frametime, SpriteAnimation* animation, Rectangle dest, Vector2 origin, float rotation, Color tint);
+//// FROM SCALED_DRAW.H ///////////
 
 #endif

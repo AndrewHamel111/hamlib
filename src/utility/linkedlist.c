@@ -1,4 +1,4 @@
-#include "hamlib/linkedlist.h"
+#include "hamlib/lists/linkedlist.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -157,7 +157,14 @@ node* Remove(node* _node)
 node* RemoveHead(node** head)
 {
 	node* temp = *head;
-	*head = temp->next;
+	if (temp->next != NULL) // if there's more after the head
+		*head = temp->next;
+	else // if it's the last element leave it in an "empty list" state
+	{
+		*head = (node*)malloc(sizeof(node));
+		(*head)->value = (*head)->next = (*head)->prev = NULL;
+		(*head)->sz = 0;
+	}
 	FreeNode(temp);
 	return (*head);
 }

@@ -1,8 +1,14 @@
 #ifndef STACK_H_
 #define STACK_H_
 
-#define MAX_STACK 128
+#ifndef MAX_STACK
+#define MAX_STACK 32
+#endif
 
+/**
+ * \brief A stack data structure. The max can be set by defining MAX_STACK
+ * 
+ */
 typedef struct Stack
 {
 	// private

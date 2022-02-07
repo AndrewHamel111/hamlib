@@ -1,6 +1,5 @@
-#include "hamlib/alarm_def.h"
-#include "hamlib/alarm_func.h"
-#include "hamlib/alarm_registry.h"
+#define ALARM_REGISTRY
+#include "hamlib/alarm.h"
 #define REPEATING_ALARM_CARRIES_TIME
 
 #include <stdlib.h>

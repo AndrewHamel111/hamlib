@@ -6,17 +6,13 @@
  * @copyright Copyright (c) 2021
  */
 
+// TODO: fix const discarding by, instead of accessing text directly, increment c from 0 and add it to text each iteration.
+
 #include "hamlib.h"
+#include "hamlib/draw.h"
 
 #include <string.h>
 #include <stdlib.h>
-
-static bool showTextAnchors = false;
-
-void ShowTextAlignedAnchors(bool show)
-{
-	showTextAnchors = show;
-}
 
 void DrawMultilineTextAligned(const char* text, int posX, int posY, int fontSize, Color color, TEXT_ALIGNMENT alignment);
 
@@ -88,13 +84,6 @@ void DrawMultilineTextAligned(const char* text, int posX, int posY, int fontSize
 		}
 	}
 
-	if (showTextAnchors)
-	{
-		for(int i = 0; i <= lineCount; i++) // DEBUG STUFF
-				DrawCircle(posX, linePositions[i], 3, GREEN);
-		DrawCircle(posX, posY, 5, ORANGE);
-	}
-
 	free(linePositions);
 }
 
@@ -104,10 +93,9 @@ void DrawTextAligned(const char* text, int posX, int posY, int fontSize, Color c
 
 	// Find out if we need to use the multiline logic here
 	bool isMultiLine = false;
-	char* c;
-	c = text;
-	while(c < (text + len) && !isMultiLine)
-		if (*c == '\n')
+	char c = 0;
+	while((text + c) < (text + len) && !isMultiLine)
+		if (*(text + c) == '\n')
 			isMultiLine = true;
 		else
 			c++;
@@ -175,4 +163,19 @@ void DrawTextureScaled(Texture2D texture, Vector2 pos, Vector2 scaling, Color co
 	Rectangle src = (Rectangle){0, 0, texture.width, texture.height};
 	Rectangle dst = (Rectangle){pos.x + ((1.0f - scaling.x) * texture.width * 0.5f), pos.y + ((1.0f - scaling.y) * texture.height * 0.5f), scaling.x * texture.width, scaling.y * texture.height};
 	DrawTexturePro(texture, src, dst, (Vector2){0, 0}, 0, color);
+}
+
+void DrawRectangleCentered(int posX, int posY, int width, int height, Color color)
+{
+	DrawRectangleCenteredRec((Rectangle){posX, posY, width, height}, color);
+}
+
+void DrawRectangleCenteredV(Vector2 position, Vector2 size, Color color)
+{
+	DrawRectangleCenteredRec(RecFromVec(position, size), color);
+}
+
+void DrawRectangleCenteredRec(Rectangle rectangle, Color color)
+{
+	DrawRectangleRec(CenterRect(rectangle), color);
 }

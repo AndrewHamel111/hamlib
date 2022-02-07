@@ -3,6 +3,16 @@
 #include <stdlib.h>
 #include <math.h>
 
+float signf(float f)
+{
+	return (f < 0) ? -1.0f : 1.0f;
+}
+
+int sign(int i)
+{
+	return (i < 0) ? -1 : 1;
+}
+
 int randsign(void)
 {
 	return (rand() % 2) ? 1 : -1;
@@ -10,61 +20,35 @@ int randsign(void)
 
 float randsignf(void)
 {
-	return (float)randsign();
+	return (rand() % 2) ? 1.0f : -1.0f;
 }
 
 void reducebyf(float* f, float r)
 {
 	if (*f == 0) return;
 
-	if (*f > 0)
-	{
-		if (*f > r)
-			*f -= r;
-		else
-			*f = 0;
-	}
+	if (fabsf(*f) < fabsf(r))
+		*f = 0;
 	else
-	{
-		if (*f < ((-1.0f) * r))
-			*f += r;
-		else
-			*f = 0;
-	}
+		*f -= r * signf(*f);
 }
 
-void reducebyi(int* f, int r)
+void reducebyi(int* i, int r)
 {
-	if (*f == 0) return;
+	if (*i == 0) return;
 
-	if (*f > 0)
-	{
-		if (*f > r)
-			*f -= r;
-		else
-			*f = 0;
-	}
+	if (abs(*i) < abs(r))
+		*i = 0;
 	else
-	{
-		if (*f < ((-1) * r))
-			*f += r;
-		else
-			*f = 0;
-	}
+		*i -= r * sign(*i);
 }
 
 void increasebyf(float* f, float r)
 {
-	if (*f > 0)
-		*f += fabsf(r);
-	else
-		*f -= fabsf(r);
+	*f += fabsf(r) * signf(*f);
 }
 
-void increasebyi(int* f, int r)
+void increasebyi(int* i, int r)
 {
-	if (*f > 0)
-		*f += abs(r);
-	else
-		*f -= abs(r);
+	*i += abs(r) * sign(*i);
 }

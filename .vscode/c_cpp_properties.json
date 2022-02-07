@@ -5,7 +5,8 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/src/**",
-                "C:/Users/thelu/Documents/Projects/hamlib/include"
+                "C:/Users/thelu/Documents/Projects/hamlib/include",
+                "C:/raylib/raylib/src"
             ],
             "defines": [],
             "compilerPath": "C:/raylib/mingw/bin/gcc",
