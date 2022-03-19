@@ -9,15 +9,28 @@
 #include "hamlib.h"
 #include "hamlib/imgui.h"
 
-bool Button(Rectangle rect, Color color)
+bool button(Rectangle rect, Color color)
 {
 	DrawRectangleRec(rect, color);
 	return CheckCollisionPointRec(GetMousePosition(), rect) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
 }
 
-bool ButtonTintable(Rectangle rect, Color color)
+bool buttonTintable(Rectangle rect, Color color)
 {
 	bool flag = CheckCollisionPointRec(GetMousePosition(), rect);
 	DrawRectangleRec(rect, flag ? tintcolor(color, 0.6f) : color);
 	return flag && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
+}
+
+void progressBar(Rectangle rectangle, Color bg, Color fg, Color outline, float percent)
+{
+	DrawRectangleRec(rectangle, bg);
+	DrawRectangle(rectangle.x, rectangle.y, rectangle.width * percent, rectangle.height, fg);
+	DrawRectangleLinesEx(rectangle, rectangle.height/15, outline);
+}
+
+void progressBarTintable(Rectangle rectangle, Color bg, Color fg, Color outline, float percent, Color colorWarning, float percentWarning, Color colorCritical, float percentCritical)
+{
+	Color color = (percent <= percentCritical) ? colorCritical : (percent <= percentWarning) ? colorWarning : fg;
+	progressBar(rectangle, bg, color, outline, percent);
 }

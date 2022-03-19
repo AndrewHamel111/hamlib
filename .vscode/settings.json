@@ -13,7 +13,8 @@
 		"menu.h": "c",
 		"queue.h": "c",
 		"stack.h": "c",
-		"math.h": "c"
+		"math.h": "c",
+		"imgui.h": "c"
 	},
 	"C_Cpp.errorSquiggles": "Enabled"
 }

@@ -8,29 +8,24 @@
 
 #include "hamlib.h"
 
-Vector2 GetCenter(Rectangle rect)
+Vector2 getRectCenter(Rectangle rect)
 {
 	return (Vector2){rect.x + rect.width/2, rect.y + rect.height/2};
 }
 
-Vector2 GetCenterRelative(Rectangle rect)
+Vector2 getRectCenterRelative(Rectangle rect)
 {
 	return (Vector2){(int)(rect.width/2), (int)(rect.height/2)};
 }
 
 // RECTANGLE OTHER OPERATIONS //
 
-Rectangle PureSource(Texture2D texture)
+Rectangle pureSource(Texture2D texture)
 {
 	return (Rectangle){0, 0, texture.width, texture.height};
 }
 
-Rectangle CenterRect(Rectangle rectangle)
-{
-	return (Rectangle){rectangle.x - rectangle.width/2, rectangle.y - rectangle.height/2, rectangle.width, rectangle.height};
-}
-
-Rectangle RecFromVec(Vector2 position, Vector2 size)
+Rectangle recFromVec(Vector2 position, Vector2 size)
 {
 	return (Rectangle){position.x, position.y, size.x, size.y};
 }

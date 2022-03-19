@@ -15,12 +15,12 @@
 
 #define GAMEPAD_MENU_DEADZONE 0.1
 
-// TODO brew some coffee and unify much of the code in UpdateMenu
+// TODO brew some coffee and unify much of the code in updateMenu
 
 #define BUTTONS_LENGTH 6
-enum BUTTONS
+enum buttons
 {
-    BUTTON_UP, BUTTON_DOWN, BUTTON_LEFT, BUTTON_RIGHT, BUTTON_B, BUTTON_A
+    ButtonUp, ButtonDown, ButtonLeft, ButtonRight, ButtonB, ButtonA
 };
 static bool buttonpressed[BUTTONS_LENGTH] = {false};
 
@@ -28,11 +28,11 @@ static bool buttonpressed[BUTTONS_LENGTH] = {false};
 /** prevents the joystick from freaking out the menu logic when an input is held */
 // static bool gamepadAvailable;
 
-UIElement CreateUIElementButton(Rectangle rectangle, char* msg, void (*func)(void))
+uiElement createUiElementButton(Rectangle rectangle, char* string, void (*func)(void))
 {
-    UIElement element;
+    uiElement element;
     element.rectangle = rectangle;
-    strcpy(element.msg, msg);
+    strcpy(element.msg, string);
 	element.fontsize = -1;
     element.onSelect = func;
     
@@ -40,79 +40,81 @@ UIElement CreateUIElementButton(Rectangle rectangle, char* msg, void (*func)(voi
     element.textColor = (Color){15,15,15,255};
     element.highlightedColor = (Color){255,220,255,255};
 	
-	// sprite uninitialized
-	element.drawmode = DM_RECT | DM_TEXT;
-	element.highlightmode = HM_COLOR;
+	// particleSprite uninitialized
+	element.drawmode = DmRect | DmText;
+	element.highlightmode = HmColor;
 
 	element.isEmpty = false;
-	element.nav = (UIElementNav){-1, -1, -1, -1};
+	element.nav = (uiElementNav){-1, -1, -1, -1};
     
     return element;
 }
 
-UIElement CreateEmptyUIElement()
+uiElement createEmptyUiElement()
 {
-    UIElement element;
+    uiElement element;
     element.isEmpty = true;
     return element;
 }
 
-void SetUIElementColors(UIElement* element, Color color, Color textColor, Color highlightedColor)
+void setUiElementColors(uiElement* element, Color color, Color textColor, Color highlightedColor)
 {
     element->color = color;
     element->textColor = textColor;
     element->highlightedColor = highlightedColor;
 }
 
-void SetUIElementBehaviour(UIElement* element, void (*func)(void))
+void setUiElementBehaviour(uiElement* element, void (*func)(void))
 {
     element->onSelect = func;
 }
 
-void DrawUIElement(UIElement element, bool isSelected)
+void drawUiElement(uiElement element, bool isSelected)
 {
 	if (element.isEmpty) return;
 
-	Color color = (isSelected && (element.highlightmode == HM_COLOR)) ? (element.highlightedColor) : (element.color);
-	Texture2D sprite = (isSelected && (element.highlightmode == HM_SPRITESWAP)) ? element.highlightedsprite : element.sprite;
+	Color color = (isSelected && (element.highlightmode == HmColor)) ? (element.highlightedColor) : (element.color);
+	Texture2D sprite = (isSelected && (element.highlightmode == HmSpriteswap)) ? element.highlightedsprite : element.sprite;
 	
-	if ((element.drawmode & DM_RECT) == DM_RECT)
+	if ((element.drawmode & DmRect) == DmRect)
 	{
     	DrawRectangleRec(element.rectangle, color);
 	}
 	
-	if ((element.drawmode & DM_NINESLICE) == DM_NINESLICE)
+	if ((element.drawmode & DmNineslice) == DmNineslice)
 	{
 		DrawTextureNPatch(sprite, element.nfo, element.rectangle, (Vector2){0,0}, 0.0f, color);
 	}
-	else if ((element.drawmode & DM_SPRITE) == DM_SPRITE)
+	else if ((element.drawmode & DmSprite) == DmSprite)
 	{
-		DrawTexturePro(sprite, PureSource(sprite), element.rectangle, GetCenter(element.rectangle), 0.0f, color);
+		DrawTexturePro(sprite, pureSource(sprite), element.rectangle, getRectCenter(element.rectangle), 0.0f, color);
 	}
 
-	if ((element.drawmode & DM_TEXT) == DM_TEXT)
+	if ((element.drawmode & DmText) == DmText)
 	{
-		Vector2 v = GetCenter(element.rectangle);
-		DrawTextAligned(element.msg, v.x, v.y, (element.fontsize > 0) ? (element.fontsize) : (element.rectangle.height/3), element.textColor, TA_CENTER | TA_MIDDLE);
+		Vector2 v = getRectCenter(element.rectangle);
+		drawTextAligned(element.msg, v.x, v.y,
+						(element.fontsize > 0) ? (element.fontsize) : (element.rectangle.height / 3), element.textColor,
+						TaCenter | TaMiddle);
 	}
 }
 
-Menu CreateMenu(UIElement* elements, unsigned char sz)
+menu createMenu(uiElement* element, unsigned char sz)
 {
-    Menu menu;
-	menu._sz = sz;
+    menu menu;
+	menu.elementsCount = sz;
     
-    // reallocate the elements data so that after calling CreateMenu the original list is freed automatically.
-    UIElement* _elements = (UIElement*)malloc(sizeof(UIElement) * (menu._sz));
+    // reallocate the elements data so that after calling createMenu the original list is freed automatically.
+    uiElement* newElements = (uiElement*)malloc(sizeof(uiElement) * (menu.elementsCount));
     for(int i = 0; i < sz; i++)
-        _elements[i] = elements[i];
+		newElements[i] = element[i];
     // free the original list
-    free(elements);
+    free(element);
     
-    menu.elements = _elements;
-	menu._sz = sz;
+    menu.elements = newElements;
+	menu.elementsCount = sz;
     menu.index = 0;
-    menu.wrapbehaviour = MW_WRAP;
+    menu.wrapbehaviour = MwWrap;
 	menu.isGridMenu = false;
 	
 	menu.lastindex = 0;
@@ -122,22 +124,22 @@ Menu CreateMenu(UIElement* elements, unsigned char sz)
     return menu;
 }
 
-Menu CreateGridMenu(UIElement* elements, Vector2 sz)
+menu createGridMenu(uiElement* element, Vector2 gridSz)
 {
-    Menu menu;
-	menu._sz = sz.x * sz.y;
+    menu menu;
+	menu.elementsCount = gridSz.x * gridSz.y;
     
-    // reallocate the elements data so that after calling CreateMenu the original list is freed automatically.
-    UIElement* _elements = (UIElement*)malloc(sizeof(UIElement) * (menu._sz));
-    for(int i = 0; i < menu._sz; i++)
-        _elements[i] = elements[i];
+    // reallocate the elements data so that after calling createMenu the original list is freed automatically.
+    uiElement* newElements = (uiElement*)malloc(sizeof(uiElement) * (menu.elementsCount));
+    for(int i = 0; i < menu.elementsCount; i++)
+		newElements[i] = element[i];
     // free the original list
-    free(elements);
+    free(element);
     
-    menu.elements = _elements;
-    menu.sz = sz;
+    menu.elements = newElements;
+    menu.sz = gridSz;
     menu.index = 0;
-    menu.wrapbehaviour = MW_WRAP;
+    menu.wrapbehaviour = MwWrap;
 	menu.isGridMenu = true;
 	
 	menu.lastindex = 0;
@@ -147,90 +149,90 @@ Menu CreateGridMenu(UIElement* elements, Vector2 sz)
     return menu;
 }
 
-void ClampMenuIndex(Menu* menu)
+void clampMenuIndex(menu* mnu)
 {
-	if (menu->index >= menu->_sz)
-		menu->index = (menu->wrapbehaviour == MW_WRAP) ? 0 : (menu->_sz - 1);
-	else if (menu->index < 0)
-		menu->index = (menu->wrapbehaviour == MW_WRAP) ? (menu->_sz - 1) : 0;
+	if (mnu->index >= mnu->elementsCount)
+		mnu->index = (mnu->wrapbehaviour == MwWrap) ? 0 : (mnu->elementsCount - 1);
+	else if (mnu->index < 0)
+		mnu->index = (mnu->wrapbehaviour == MwWrap) ? (mnu->elementsCount - 1) : 0;
 }
 
-void ClampMenuGrid(Menu* menu, Vector2 d)
+void clampMenuGrid(menu* mnu, Vector2 d)
 {
-	if (menu->index >= menu->_sz)
-		menu->index = ((menu->wrapbehaviour & MW_WRAP) == MW_WRAP) ? (menu->index % menu->_sz) : menu->_sz - 1;
-	else if (menu->index < 0)
-		menu->index = ((menu->wrapbehaviour & MW_WRAP) == MW_WRAP) ? menu->_sz + menu->index : 0;
+	if (mnu->index >= mnu->elementsCount)
+		mnu->index = ((mnu->wrapbehaviour & MwWrap) == MwWrap) ? (mnu->index % mnu->elementsCount) : mnu->elementsCount - 1;
+	else if (mnu->index < 0)
+		mnu->index = ((mnu->wrapbehaviour & MwWrap) == MwWrap) ? mnu->elementsCount + mnu->index : 0;
 
 	// removes the "michaela behaviour"
-	if (((menu->wrapbehaviour & MW_WRAP) == MW_WRAP))
+	if (((mnu->wrapbehaviour & MwWrap) == MwWrap))
 	{
-		if (!(menu->index % (char)(menu->sz.x)) && (d.x > 0))
+		if (!(mnu->index % (char)(mnu->sz.x)) && (d.x > 0))
 		{
-			if (menu->index == 0)
-				menu->index = menu->_sz - menu->sz.x;
+			if (mnu->index == 0)
+				mnu->index = mnu->elementsCount - mnu->sz.x;
 			else
-				menu->index -= menu->sz.x;
+				mnu->index -= mnu->sz.x;
 		}
-		else if (!((menu->index + 1) % (char)(menu->sz.x)) && (d.x < 0))
+		else if (!((mnu->index + 1) % (char)(mnu->sz.x)) && (d.x < 0))
 		{
-			if (menu->index == (menu->_sz - 1))
-				menu->index = menu->sz.x - 1;
+			if (mnu->index == (mnu->elementsCount - 1))
+				mnu->index = mnu->sz.x - 1;
 			else
-				menu->index += menu->sz.x;
+				mnu->index += mnu->sz.x;
 		}
 	}
 
-	if (menu->wrapbehaviour == MW_WRAP)
+	if (mnu->wrapbehaviour == MwWrap)
 	{
 		// escape empty elements
-		while(menu->elements[menu->index].isEmpty && !((d.x == 0) && (d.y == 0)))
+		while(mnu->elements[mnu->index].isEmpty && !((d.x == 0) && (d.y == 0)))
 		{
-			signed char flat_d = d.x + (d.y * menu->sz.x);
-			menu->index += flat_d;
+			signed char flatD = d.x + (d.y * mnu->sz.x);
+			mnu->index += flatD;
 
-			if (menu->index >= menu->_sz)
-				menu->index = menu->index % menu->_sz;
-			else if (menu->index < 0)
-				menu->index = menu->_sz + menu->index;
+			if (mnu->index >= mnu->elementsCount)
+				mnu->index = mnu->index % mnu->elementsCount;
+			else if (mnu->index < 0)
+				mnu->index = mnu->elementsCount + mnu->index;
 		}
 	}
-	else if (((menu->wrapbehaviour & MW_RISE) == MW_RISE) || ((menu->wrapbehaviour & MW_FALL) == MW_FALL))
+	else if (((mnu->wrapbehaviour & MwRise) == MwRise) || ((mnu->wrapbehaviour & MwFall) == MwFall))
 	{
-		signed char step = ((menu->wrapbehaviour & MW_RISE) == MW_RISE) ? (-menu->sz.x) : (menu->sz.x);
+		signed char step = ((mnu->wrapbehaviour & MwRise) == MwRise) ? (-mnu->sz.x) : (mnu->sz.x);
 		signed char esc = 0; // attempted steps. if we loop around the entire menu we will just abandon the input
-		while(menu->elements[menu->index].isEmpty && (++esc < (signed char)(1.15f * menu->sz.y)))
+		while(mnu->elements[mnu->index].isEmpty && (++esc < (signed char)(1.15f * mnu->sz.y)))
 		{
-			menu->index += step;
+			mnu->index += step;
 		}
 
-		if (esc >= (signed char)(1.15f * menu->sz.y))
+		if (esc >= (signed char)(1.15f * mnu->sz.y))
 		{
 			// undo the input that got us here
-			signed char flat_d = d.x + (d.y * menu->sz.x);
-			flat_d *= -1;
-			menu->index += flat_d;
+			signed char flatD = d.x + (d.y * mnu->sz.x);
+			flatD *= -1;
+			mnu->index += flatD;
 		}
 	}
-	else if (menu->wrapbehaviour == MW_NONE)
+	else if (mnu->wrapbehaviour == MwNone)
 	{
-		if (menu->index >= menu->_sz)
-			menu->index = menu->_sz - 1;
-		else if (menu->index < 0)
-			menu->index = 0;
+		if (mnu->index >= mnu->elementsCount)
+			mnu->index = mnu->elementsCount - 1;
+		else if (mnu->index < 0)
+			mnu->index = 0;
 	}
 }
 
-void UpdateMenu(Menu* menu)
+void updateMenu(menu* mnu)
 {
-	buttonpressed[BUTTON_UP] = IsKeyPressed(KEY_W); // poll inputs
-	buttonpressed[BUTTON_DOWN] = IsKeyPressed(KEY_S);
-	buttonpressed[BUTTON_LEFT] = IsKeyPressed(KEY_A);
-	buttonpressed[BUTTON_RIGHT] = IsKeyPressed(KEY_D);
-	buttonpressed[BUTTON_B] = IsKeyPressed(KEY_L);
-	buttonpressed[BUTTON_A] = IsKeyPressed(KEY_SEMICOLON);
+	buttonpressed[ButtonUp] = IsKeyPressed(KEY_W); // poll inputs
+	buttonpressed[ButtonDown] = IsKeyPressed(KEY_S);
+	buttonpressed[ButtonLeft] = IsKeyPressed(KEY_A);
+	buttonpressed[ButtonRight] = IsKeyPressed(KEY_D);
+	buttonpressed[ButtonB] = IsKeyPressed(KEY_L);
+	buttonpressed[ButtonA] = IsKeyPressed(KEY_SEMICOLON);
 
-	buttonpressed[BUTTON_A] = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
+	buttonpressed[ButtonA] = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
 
 	int i = 0;
 	while(IsGamepadAvailable(i))
@@ -246,108 +248,108 @@ void UpdateMenu(Menu* menu)
 		buttonpressed[BUTTON_RIGHT] |= GetGamepadAxisMovement(i, GAMEPAD_AXIS_LEFT_X) > GAMEPAD_MENU_DEADZONE;
 		*/
 
-		buttonpressed[BUTTON_A] |= IsGamepadButtonPressed(i, GAMEPAD_BUTTON_MIDDLE_RIGHT);
+		buttonpressed[ButtonA] |= IsGamepadButtonPressed(i, GAMEPAD_BUTTON_MIDDLE_RIGHT);
 
-		buttonpressed[BUTTON_UP] |= IsGamepadButtonPressed(i, GAMEPAD_BUTTON_LEFT_FACE_UP);
-		buttonpressed[BUTTON_DOWN] |= IsGamepadButtonPressed(i, GAMEPAD_BUTTON_LEFT_FACE_DOWN);
-		buttonpressed[BUTTON_LEFT] |= IsGamepadButtonPressed(i, GAMEPAD_BUTTON_LEFT_FACE_LEFT);
-		buttonpressed[BUTTON_RIGHT] |= IsGamepadButtonPressed(i, GAMEPAD_BUTTON_LEFT_FACE_RIGHT);
-		buttonpressed[BUTTON_A] |= IsGamepadButtonPressed(i, GAMEPAD_BUTTON_RIGHT_FACE_DOWN);
-		buttonpressed[BUTTON_B] |= IsGamepadButtonPressed(i, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT);
+		buttonpressed[ButtonUp] |= IsGamepadButtonPressed(i, GAMEPAD_BUTTON_LEFT_FACE_UP);
+		buttonpressed[ButtonDown] |= IsGamepadButtonPressed(i, GAMEPAD_BUTTON_LEFT_FACE_DOWN);
+		buttonpressed[ButtonLeft] |= IsGamepadButtonPressed(i, GAMEPAD_BUTTON_LEFT_FACE_LEFT);
+		buttonpressed[ButtonRight] |= IsGamepadButtonPressed(i, GAMEPAD_BUTTON_LEFT_FACE_RIGHT);
+		buttonpressed[ButtonA] |= IsGamepadButtonPressed(i, GAMEPAD_BUTTON_RIGHT_FACE_DOWN);
+		buttonpressed[ButtonB] |= IsGamepadButtonPressed(i, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT);
 
 		i++;
 	}
 	
 
-	bool confirm = buttonpressed[BUTTON_A]; // || buttonpressed[BUTTON_B];
+	bool confirm = buttonpressed[ButtonA]; // || buttonpressed[BUTTON_B];
 	//bool back = buttonpressed[BUTTON_B];
 	
-	if (menu->isGridMenu)
+	if (mnu->isGridMenu)
 	{ // grid case
-		Vector2 d = (Vector2){(signed char)buttonpressed[BUTTON_RIGHT] - (signed char)buttonpressed[BUTTON_LEFT], (signed char)buttonpressed[BUTTON_DOWN] - (signed char)buttonpressed[BUTTON_UP]};
+		Vector2 d = (Vector2){(signed char)buttonpressed[ButtonRight] - (signed char)buttonpressed[ButtonLeft], (signed char)buttonpressed[ButtonDown] - (signed char)buttonpressed[ButtonUp]};
 
 		// check for mouse navigation
 		bool flag = false;
-		for(int i = 0; i < menu->_sz; i++)
+		for(int j = 0; j < mnu->elementsCount; j++)
 		{
-			if (CheckCollisionPointRec(GetMousePosition(), (menu->elements[i]).rectangle) && !((menu->elements[i]).isEmpty))
+			if (CheckCollisionPointRec(GetMousePosition(), (mnu->elements[j]).rectangle) && !((mnu->elements[j]).isEmpty))
 			{
-				menu->lastindex = menu->index;
-				menu->index = i;
-				menu->currentindexsetbymouse = true;
-				menu->mousedisengaged = false;
+				mnu->lastindex = mnu->index;
+				mnu->index = j;
+				mnu->currentindexsetbymouse = true;
+				mnu->mousedisengaged = false;
 				flag = true;
 				d = (Vector2){0,0};
 			}
 		}
 
-		if (!flag && menu->currentindexsetbymouse)
+		if (!flag && mnu->currentindexsetbymouse)
 		{
-			menu->mousedisengaged = true;
-			menu->index = -1;
+			mnu->mousedisengaged = true;
+			mnu->index = -1;
 		}
 		
-		signed char flat_d = d.x + (d.y * menu->sz.x);
+		signed char flatD = d.x + (d.y * mnu->sz.x);
 
-		if(flat_d != 0)
+		if(flatD != 0)
 		{
-			UIElement e = menu->elements[(menu->index == -1) ? menu->lastindex : menu->index];
-
-			menu->mousedisengaged = false;
-			menu->currentindexsetbymouse = false;
-			if (menu->index == -1)
+			uiElement e = mnu->elements[(mnu->index == -1) ? mnu->lastindex : mnu->index];
+			
+			mnu->mousedisengaged = false;
+			mnu->currentindexsetbymouse = false;
+			if (mnu->index == -1)
 			{
-				if (HasCustomNav(e))
+				if (hasCustomNav(e))
 				{
 					if ((e.nav.left > -1) && (d.x < 0))
 					{
-						menu->index = e.nav.left;
+						mnu->index = e.nav.left;
 					}
 					else if ((e.nav.right > -1) && (d.x > 0))
 					{
-						menu->index = e.nav.right;
+						mnu->index = e.nav.right;
 					}
 					else if ((e.nav.up > -1) && (d.y < 0))
 					{
-						menu->index = e.nav.up;
+						mnu->index = e.nav.up;
 					}
 					else if ((e.nav.down > -1) && (d.y > 0))
 					{
-						menu->index = e.nav.down;
+						mnu->index = e.nav.down;
 					}
 				}
 				else
 				{
-					menu->index = menu->lastindex + flat_d;
-					ClampMenuGrid(menu, d);
+					mnu->index = mnu->lastindex + flatD;
+					clampMenuGrid(mnu, d);
 				}
 			}
 			else 
 			{
-				menu->lastindex = menu->index;
-				if (HasCustomNav(e))
+				mnu->lastindex = mnu->index;
+				if (hasCustomNav(e))
 				{
 					if ((e.nav.left > -1) && (d.x < 0))
 					{
-						menu->index = e.nav.left;
+						mnu->index = e.nav.left;
 					}
 					else if ((e.nav.right > -1) && (d.x > 0))
 					{
-						menu->index = e.nav.right;
+						mnu->index = e.nav.right;
 					}
 					else if ((e.nav.up > -1) && (d.y < 0))
 					{
-						menu->index = e.nav.up;
+						mnu->index = e.nav.up;
 					}
 					else if ((e.nav.down > -1) && (d.y > 0))
 					{
-						menu->index = e.nav.down;
+						mnu->index = e.nav.down;
 					}
 				}
 				else
 				{
-					menu->index += flat_d;
-					ClampMenuGrid(menu, d);
+					mnu->index += flatD;
+					clampMenuGrid(mnu, d);
 				}
 			}
 
@@ -355,90 +357,90 @@ void UpdateMenu(Menu* menu)
 	} // grid case
 	else
 	{ // linear case
-		signed char d = (signed char)(buttonpressed[BUTTON_DOWN] || buttonpressed[BUTTON_RIGHT]) - (signed char)(buttonpressed[BUTTON_UP] || buttonpressed[BUTTON_LEFT]);
+		signed char d = (signed char)(buttonpressed[ButtonDown] || buttonpressed[ButtonRight]) - (signed char)(buttonpressed[ButtonUp] || buttonpressed[ButtonLeft]);
 
-		Vector2 v_d = (Vector2){(signed char)buttonpressed[BUTTON_RIGHT] - (signed char)buttonpressed[BUTTON_LEFT], (signed char)buttonpressed[BUTTON_DOWN] - (signed char)buttonpressed[BUTTON_UP]};
+		Vector2 vD = (Vector2){(signed char)buttonpressed[ButtonRight] - (signed char)buttonpressed[ButtonLeft], (signed char)buttonpressed[ButtonDown] - (signed char)buttonpressed[ButtonUp]};
 
 		// check for mouse navigation
 		bool flag = false;
-		for(int i = 0; i < menu->_sz; i++)
+		for(int j = 0; j < mnu->elementsCount; j++)
 		{
-			if (CheckCollisionPointRec(GetMousePosition(), (menu->elements[i]).rectangle))
+			if (CheckCollisionPointRec(GetMousePosition(), (mnu->elements[j]).rectangle))
 			{
-				menu->lastindex = menu->index;
-				menu->index = i;
-				menu->currentindexsetbymouse = true;
-				menu->mousedisengaged = false;
+				mnu->lastindex = mnu->index;
+				mnu->index = j;
+				mnu->currentindexsetbymouse = true;
+				mnu->mousedisengaged = false;
 				flag = true;
 				d = 0;
 			}
 		}
 
-		if (!flag && menu->currentindexsetbymouse)
+		if (!flag && mnu->currentindexsetbymouse)
 		{
-			menu->mousedisengaged = true;
-			menu->index = -1;
+			mnu->mousedisengaged = true;
+			mnu->index = -1;
 		}
 
 		if(d != 0)
 		{
-			UIElement e = menu->elements[(menu->index == -1) ? menu->lastindex : menu->index];
-
-			menu->mousedisengaged = false;
-			menu->currentindexsetbymouse = false;
-			if (menu->index == -1)
+			uiElement e = mnu->elements[(mnu->index == -1) ? mnu->lastindex : mnu->index];
+			
+			mnu->mousedisengaged = false;
+			mnu->currentindexsetbymouse = false;
+			if (mnu->index == -1)
 			{
-				if (HasCustomNav(e))
+				if (hasCustomNav(e))
 				{
-					if ((e.nav.left > -1) && (v_d.x < 0))
+					if ((e.nav.left > -1) && (vD.x < 0))
 					{
-						menu->index = e.nav.left;
+						mnu->index = e.nav.left;
 					}
-					else if ((e.nav.right > -1) && (v_d.x > 0))
+					else if ((e.nav.right > -1) && (vD.x > 0))
 					{
-						menu->index = e.nav.right;
+						mnu->index = e.nav.right;
 					}
-					else if ((e.nav.up > -1) && (v_d.y < 0))
+					else if ((e.nav.up > -1) && (vD.y < 0))
 					{
-						menu->index = e.nav.up;
+						mnu->index = e.nav.up;
 					}
-					else if ((e.nav.down > -1) && (v_d.y > 0))
+					else if ((e.nav.down > -1) && (vD.y > 0))
 					{
-						menu->index = e.nav.down;
+						mnu->index = e.nav.down;
 					}
 				}
 				else
 				{
-					menu->index = menu->lastindex + d;
-					ClampMenuIndex(menu);
+					mnu->index = mnu->lastindex + d;
+					clampMenuIndex(mnu);
 				}
 			}
 			else 
 			{
-				menu->lastindex = menu->index;
-				if (HasCustomNav(e))
+				mnu->lastindex = mnu->index;
+				if (hasCustomNav(e))
 				{
-					if ((e.nav.left > -1) && (v_d.x < 0))
+					if ((e.nav.left > -1) && (vD.x < 0))
 					{
-						menu->index = e.nav.left;
+						mnu->index = e.nav.left;
 					}
-					else if ((e.nav.right > -1) && (v_d.x > 0))
+					else if ((e.nav.right > -1) && (vD.x > 0))
 					{
-						menu->index = e.nav.right;
+						mnu->index = e.nav.right;
 					}
-					else if ((e.nav.up > -1) && (v_d.y < 0))
+					else if ((e.nav.up > -1) && (vD.y < 0))
 					{
-						menu->index = e.nav.up;
+						mnu->index = e.nav.up;
 					}
-					else if ((e.nav.down > -1) && (v_d.y > 0))
+					else if ((e.nav.down > -1) && (vD.y > 0))
 					{
-						menu->index = e.nav.down;
+						mnu->index = e.nav.down;
 					}
 				}
 				else
 				{
-					menu->index += d;
-					ClampMenuIndex(menu);
+					mnu->index += d;
+					clampMenuIndex(mnu);
 				}
 			}
 		}
@@ -446,78 +448,78 @@ void UpdateMenu(Menu* menu)
 
     if (confirm)
     {
-		if (menu->index != -1)
-        	(*(menu->elements[menu->index].onSelect))();
+		if (mnu->index != -1)
+        	(*(mnu->elements[mnu->index].onSelect))();
     }
 }
 
-void DrawMenu(Menu menu)
+void drawMenu(menu mnu)
 {
-	int sz = (menu.isGridMenu) ? menu.sz.x * menu.sz.y : menu._sz;
+	int sz = (mnu.isGridMenu) ? mnu.sz.x * mnu.sz.y : mnu.elementsCount;
     for(int i = 0; i < sz; i++)
-        DrawUIElement(menu.elements[i], menu.index == i);
+		drawUiElement(mnu.elements[i], mnu.index == i);
 }
 
-UIElement ElementAt(Menu menu, int x, int y)
+uiElement elementAt(menu mnu, int x, int y)
 {
-	if (menu.isGridMenu)
+	if (mnu.isGridMenu)
 	{
-		x = x % (int)menu.sz.x; // bounds for x and y. for valid input,
-		y = y % (int)menu.sz.y; // this changes nothing
+		x = x % (int)mnu.sz.x; // bounds for x and y. for valid input,
+		y = y % (int)mnu.sz.y; // this changes nothing
 		
-		return menu.elements[(y * (int)menu.sz.x) + x];
+		return mnu.elements[(y * (int)mnu.sz.x) + x];
 	}
 	else
-		return *(menu.elements);
+		return *(mnu.elements);
 }
 
-UIElement* ElementRefAt(Menu menu, int x, int y)
+uiElement* elementRefAt(menu mnu, int x, int y)
 {
-	if (menu.isGridMenu)
+	if (mnu.isGridMenu)
 	{
-		x = x % (int)menu.sz.x; // bounds for x and y. for valid input,
-		y = y % (int)menu.sz.y; // this changes nothing
+		x = x % (int)mnu.sz.x; // bounds for x and y. for valid input,
+		y = y % (int)mnu.sz.y; // this changes nothing
 		
-		return menu.elements + ((y * (int)menu.sz.x) + x);
+		return mnu.elements + ((y * (int)mnu.sz.x) + x);
 	}
 	else
-		return menu.elements;
+		return mnu.elements;
 }
 
-void SetNavUp(UIElement* e, signed char i)
+void setNavUp(uiElement* element, signed char i)
 {
-	UIElementNav n = e->nav;
+	uiElementNav n = element->nav;
 	n.up = i;
-	e->nav = n;
+	element->nav = n;
 }
 
-void SetNavRight(UIElement* e, signed char i)
+void setNavRight(uiElement* element, signed char i)
 {
-	UIElementNav n = e->nav;
+	uiElementNav n = element->nav;
 	n.right = i;
-	e->nav = n;
+	element->nav = n;
 }
 
-void SetNavDown(UIElement* e, signed char i)
+void setNavDown(uiElement* element, signed char i)
 {
-	UIElementNav n = e->nav;
+	uiElementNav n = element->nav;
 	n.down = i;
-	e->nav = n;
+	element->nav = n;
 }
 
-void SetNavLeft(UIElement* e, signed char i)
+void setNavLeft(uiElement* element, signed char i)
 {
-	UIElementNav n = e->nav;
+	uiElementNav n = element->nav;
 	n.left = i;
-	e->nav = n;
+	element->nav = n;
 }
 
-void SetNav(UIElement* e, signed char right, signed char down, signed char left, signed char up)
+void setNav(uiElement* element, signed char right, signed char down, signed char left, signed char up)
 {
-	e->nav = (UIElementNav){right, down, left, up};
+	element->nav = (uiElementNav){right, down, left, up};
 }
 
-bool HasCustomNav(UIElement e)
+bool hasCustomNav(uiElement element)
 {
-	return ((e.nav.down > -1) || (e.nav.up > -1)) || ((e.nav.left > -1) || (e.nav.right > -1));
+	return ((element.nav.down > -1) || (element.nav.up > -1)) || ((element.nav.left > -1) || (element.nav.right > -1));
 }

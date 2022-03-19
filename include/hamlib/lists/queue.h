@@ -1,5 +1,5 @@
-#ifndef QUEUE_H_
-#define QUEUE_H_
+#ifndef HAMLIB_QUEUE_H
+#define HAMLIB_QUEUE_H
 
 #include "hamlib/lists/linkedlist.h"
 #include <stdlib.h>
@@ -9,36 +9,36 @@
  */
 typedef struct queue 
 {
-	node* m_list;
-	node* m_tail;
+	node* mList;
+	node* mTail;
 
 	short length;
 } queue;
 
 /**
- * \brief Add something to the queue. If a queue is uninitialized, it will also initialize it. I should be wrapped by the implementer to better serve a specific data type.
+ * \brief add something to the queue. If a queue is uninitialized, it will also initialize it. I should be wrapped by the implementer to better serve a specific data type.
  * \param value Address of value to enqueue.
  * \param sz Number of bytes to queue (use sizeof())
  */
-void Enqueue(queue* q, void* value, size_t sz);
+void enqueue(queue* q, void* value, size_t sz);
 /**
- * \brief Dequeue the next value. Will return NULL if cannot dequeue. CanDequeue can be used to guard from NULL. I should be wrapped by the implementer to better serve a specific data type.
+ * \brief dequeue the next value. Will return NULL if cannot dequeue. canDequeue can be used to guard from NULL. I should be wrapped by the implementer to better serve a specific data type.
  * \return void* To heap data, do not directly cast and dereference, store to be freed after being copied to stack data.
  */
-void* Dequeue(queue* q, size_t* sz_out);
+void* dequeue(queue* q, size_t* szOut);
 /**
- * \brief Allocates memory for the queue, sets the length to be 0. Should only be used internally (Enqueue automatically does this)
+ * \brief Allocates memory for the queue, sets the length to be 0. Should only be used internally (enqueue automatically does this)
  */
-void InitializeQueue(queue *q);
+void initializeQueue(queue *q);
 /**
- * \brief Dequeue's all data, discarding and freeing it.
+ * \brief dequeue's all data, discarding and freeing it.
  */
-void ClearQueue(queue *q);
+void clearQueue(queue *q);
 /**
  * \brief 
- * \return true When Dequeue is ready
+ * \return true When dequeue is ready
  * \return false If: queue is null, queue internal list is null, nothing left to dequeue, element at head is invalid (invalid data or invalid size) If this happens, clear the queue.
  */
-int CanDequeue(queue *q);
+int canDequeue(queue *q);
 
 #endif

@@ -1,5 +1,5 @@
-#ifndef INPUT_H_
-#define INPUT_H_
+#ifndef HAMLIB_INPUT_H
+#define HAMLIB_INPUT_H
 
 #include "raylib.h"
 

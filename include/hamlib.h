@@ -8,19 +8,15 @@
  * @copyright Copyright (c) 2021
  */
 
-/*  // TODO //
+// TODO Move draw.h concepts from microgame madness into draw/ src folder. Some should be in global hamlib.h, others in a specialized hamlib/scaled_draw.h
 
-- Move draw.h concepts from microgame madness into draw/ src folder. Some should be in global hamlib.h, others in a specialized hamlib/scaled_draw.h
-- Make use of unions to expand the definition of UIElement while also simplifying it
-- Consider polishing a half a dozen more features before forking hamlib into hamlib-plus-plus for future development so I can play in C++ more (for employers)
-
-*/
-
-#ifndef HAMLIB_H_
-#define HAMLIB_H_
+#ifndef HAMLIB_HAMLIB_H
+#define HAMLIB_HAMLIB_H
 
 #include "raylib.h"
+
 #include "hamlib/particle.h"
+#include "hamlib/rectangle_math.h"
 
 // macros
 /** \brief Square of a value. */
@@ -32,31 +28,31 @@
 /** \brief Clamps T by A and B. Identity function when A <= T <= B. */
 #define CLAMP(T,A,B) ( (T) < (A) ? (A) : ( (T > B) ? (B) : (T) ) )
 /** \brief Clamps T by A and B. Identity function when A <= T <= B. */
-#define CLAMP_NORMAL(T) ( CLAMP(T, 0.0f, 1.0f) )
+#define CLAMP_01(T) ( CLAMP(T, 0.0f, 1.0f) )
 /** \brief Similar to Clamp, but when T Exceeds B it returns to A and vice versa. */
 #define CYCLE(T,A,B) ( (T) < (A) ? (B) : ( (T > B) ? (A) : (T) ) )
 /** \brief Linear-Interpolation between A and B by T. */
 #define LERP(A,B,T) ((B)*(T) + (A)*(1 - T))
 /** \brief LERP but T is clamped to 0 and 1. */
-#define LERPC(A,B,T) ((B)*(CLAMP(T,0,1)) + (A)*(1 - (CLAMP(T,0,1))))
+#define LERP_CLAMP(A,B,T) ((B)*(CLAMP(T,0,1)) + (A)*(1 - (CLAMP(T,0,1))))
 /** \brief Finds the Absolute Value */
 #define ABS(A) ((A < 0) ? -A : A))
 
 /**
  * \brief An enum used to determine text alignment.
  * \details This enum supports | operations to achieve multiple styles:
- * i.e. TA_CENTER | TA_BOTTOM will have the text centered horizontally but
+ * i.e. TaCenter | TaBottom will have the text centered horizontally but
  * draw upward from posY.
  */
-typedef enum
+typedef enum textAlignment
 {
-	TA_LEFT = 1, /** Horizontal Alignment - all text right of posX */
-	TA_CENTER = 2, /** Horizontal Alignment - centered on posX */
-	TA_RIGHT = 4, /** Horizontal Alignment - all text left of posX */
-	TA_TOP = 8, /** Vertical Alignment - all text below posY */
-	TA_MIDDLE = 16, /** Vertical Alignment - Centered on posY*/
-	TA_BOTTOM = 32 /** Vertical Alignment - all text above posY*/
-} TEXT_ALIGNMENT;
+	TaLeft = 1, /** Horizontal Alignment - all text right of posX */
+	TaCenter = 2, /** Horizontal Alignment - centered on posX */
+	TaRight = 4, /** Horizontal Alignment - all text left of posX */
+	TaTop = 8, /** Vertical Alignment - all text below posY */
+	TaMiddle = 16, /** Vertical Alignment - Centered on posY*/
+	TaBottom = 32 /** Vertical Alignment - all text above posY*/
+} textAlignment;
 
 /**
  * \brief Generates a random color
@@ -74,15 +70,6 @@ Color randomcolor(void);
 Color tintcolor(Color color, float amount);
 
 /**
- * \brief Fades a color by a normalized amount.
- * 
- * \param color Color to be faded.
- * \param amount 
- * \return Color Normalized value. 0.0f returns color, 1.0f returns a color with alpha of ZERO.
- */
-Color fadecolor(Color color, float amount);
-
-/**
  * \brief Linearly interpolates from one color to another.
  * 
  * \param c1 First color
@@ -96,20 +83,14 @@ Color lerpcolor(Color c1, Color c2, float t);
 // PARTICLES //
 ///////////////
 
-// TODO create a particle system
-void CreateParticle(Particle p);
-void UpdateParticles(float frametime);
-void DrawParticles(void);
-void DestroyAllParticles(void);
+void createParticle(particle p);
+void updateParticles(float frametime);
+void drawParticles(void);
+void destroyAllParticles(void);
 
 /////////////
 // UTILITY //
 /////////////
-
-#define VECTOR_ZERO CLITERAL(Vector2){ 0, 0 }
-
-// see raylib::CheckCollisionPointRec
-// bool VectorInRectangle(Vector2 v, Rectangle r);
 
 /**
  * \brief Get the Center object
@@ -117,7 +98,7 @@ void DestroyAllParticles(void);
  * \param rect Rectangle describing object bounds
  * \return Vector2 Vector at the center of the object
  */
-Vector2 GetCenter(Rectangle rect);
+Vector2 getRectCenter(Rectangle rect);
 
 /**
  * \brief Get the Center of the Rectangle relative to the top-left corner
@@ -125,9 +106,7 @@ Vector2 GetCenter(Rectangle rect);
  * \param rect Rectangle describing object bounds
  * \return Vector2 Vector at the center of the object assuming object is at origin
  */
-Vector2 GetCenterRelative(Rectangle rect);
-
-#include "hamlib/rectangle_math.h"
+Vector2 getRectCenterRelative(Rectangle rect);
 
 /**
  * \brief Returns a Source Rectangle of the full texture.
@@ -135,17 +114,12 @@ Vector2 GetCenterRelative(Rectangle rect);
  * \param texture The texture to get a pure source from. 
  * \return Rectangle A source rectangle with x,y = 0,0 and width,height matching the image's size.
  */
-Rectangle PureSource(Texture2D texture);
-
-/**
- * \brief Offset the x by -width/2 and the y by -height/2.
- */
-Rectangle CenterRect(Rectangle rectangle);
+Rectangle pureSource(Texture2D texture);
 
 /**
  * \brief Create a Rectangle from two vectors, using the first as a position and the second as a dimension.
  */
-Rectangle RecFromVec(Vector2 position, Vector2 size);
+Rectangle recFromVec(Vector2 position, Vector2 size);
 
 /**
  * \brief Swaps two objects in-place.
@@ -254,10 +228,36 @@ void increasebyi(int* f, int r);
 
 /// TWEENING ///
 
-void tween_update(float frametime);
+void tweenUpdate(float frametime);
+void tweenClear(void);
 
-void tween_int(int* value, int start, int end, float time);
-void tween_float(float* value, float start, float end, float time);
-void tween_vector(Vector2* value, Vector2 start, Vector2 end, float time);
+void setNextTweenEasingMethod(float (*easingMethod)(float,float,float,float));
+void tweenInt(int* value, int start, int end, float time);
+void tweenFloat(float* value, float start, float end, float time);
+void tweenVector(Vector2* value, Vector2 start, Vector2 end, float time);
+
+/// MESSAGE QUEUE ///
+
+#ifndef HAMLIB_MESSAGE_H
+#define HAMLIB_MESSAGE_H
+
+#ifndef MESSAGE_FONT_SIZE
+	#define MESSAGE_FONT_SIZE 45
+#endif
+#ifndef MESSAGE_EASE_TIME
+	#define MESSAGE_EASE_TIME 0.6f
+#endif
+#ifndef MESSAGE_FADE_TIME
+	#define MESSAGE_FADE_TIME 0.8f
+#endif
+void showMessage(const char* text, float time, Color color);
+void showMessagePro(const char* text, float time, Color textColor, Color color);
+void showError(const char* msg, float time);
+void clearMessages(void);
+void drawMessage(float frametime);
+void setMessagePositions(float startX, float startY, float endX, float endY);
+void setMessagePositionsVec(Vector2 start, Vector2 end);
+
+#endif
 
 #endif

@@ -1,90 +1,120 @@
-/* TODO
-** - consider an "animation registry" similar to alarm registry. for now each drawanim requires passing the GetFrameTime() to advance animations
-** - Overhaul Animation to not just be an array of sprites to avoid having many copies of the same Texture2D
-*/
+#ifndef HAMLIB_ANIMATION_H
+#define HAMLIB_ANIMATION_H
 
-#ifndef ANIMATION_H_
-#define ANIMATION_H_
+#include "hamlib/sprite.h"
 
-#include "sprite.h"
-
-enum SpriteAnimationType
+typedef enum spriteAnimationType
 {
-	SAT_ONCE, SAT_LOOPED, SAT_PING_PONG, SAT_PING_PONG_ONCE, SAT_LOOPED_N, SAT_PING_PONG_N
-};
+	SatOnce, SatLooped, SatPingPong, SatPingPongOnce, SatLoopedN, SatPingPongN
+} spriteAnimationType;
 
-typedef struct _SpriteAnimation
+// typedef struct spriteAnimation // Old system, where an animation is an array of sprites. In truth, an animation is going to share an atlas, so this was a wasteful approach.
+// {
+// 	particleSprite* sprites;
+// 	int spritesLength;
+// 	int framesPerSecond;
+// 	enum spriteAnimationType animationType;
+// 	int loopCount;
+
+// 	// PRIVATE
+// 	float secondsOnFrame;
+// 	int frameCurrent;
+// 	float secondsPerFrame;
+// 	bool playing;
+// 	bool pingPongReverse;
+// 	int loopsLeft;
+
+// } spriteAnimation;
+
+typedef struct spriteAnimation
 {
-	Sprite* sprites;
-	int sprites_length;
-	int frames_per_second;
-	enum SpriteAnimationType animation_type;
-	int loop_count;
+	sprite baseSprite;
+	Vector2* sourcePositions;
+	int spritesLength;
+	int framesPerSecond;
+	spriteAnimationType animationType;
+	int loopCount;
 
 	// PRIVATE
-	float _seconds_on_frame;
-	int _frame_current;
-	float _seconds_per_frame;
-	bool _playing;
-	bool _ping_pong_reverse;
-	int _loops_left;
+	float secondsOnFrame;
+	int frameCurrent;
+	float secondsPerFrame;
+	bool playing;
+	bool pingPongReverse;
+	int loopsLeft;
 
-} SpriteAnimation;
+} spriteAnimation;
 
 /**
  * \brief Every call to DrawSpriteAnimation__ must perform these actions first, to maintain the animation state.
  */
-void DrawSpriteAnimationBase(float frametime, SpriteAnimation* animation);
+void drawSpriteAnimationBase(float frametime, spriteAnimation* animation);
 
 /**
- * \brief SpriteAnimation constructor from minimum fields.
+ * \brief spriteAnimation constructor from minimum fields.
  * 
- * \param sprites_length no. of frames in animation
+ * \param spritesLength no. of frames in animation
  * \param sprites array of sprites corresponding to the animation
- * \param frames_per_second frames per second of the animation
- * \return SpriteAnimation 
+ * \param framesPerSecond frames per second of the animation
+ * \return spriteAnimation
  */
-SpriteAnimation NewAnimation(int sprites_length, Sprite sprites[], int frames_per_second);
+spriteAnimation newAnimationFromSprites(int spritesLength, sprite sprites[], int framesPerSecond);
+
 /**
- * \brief Set the animations framerate. Sets invalid values to 1.
+ * \brief spriteAnimation constructor from minimum fields.
  * 
- * \return SpriteAnimation modified animation
+ * \param spritesLength no. of frames in animation
+ * \param baseSprite the base particleSprite of the animation, setting an example for the size of the source rectangles and providing the atlas
+ * \param sourcePositions array of positions corresponding to each frame of the animation, where the position is used for the x and y of the source rectangle for frame i
+ * \param framesPerSecond frames per second of the animation
+ * \return spriteAnimation
  */
-SpriteAnimation ChangeAnimationFramerate(SpriteAnimation* animation, int frames_per_second);
+spriteAnimation newAnimation(int spritesLength, sprite baseSprite, Vector2 sourcePositions[], int framesPerSecond);
+/**
+ * \brief set the animations framerate. Sets invalid values to 1.
+ * 
+ * \return spriteAnimation modified animation
+ */
+spriteAnimation changeAnimationFramerate(spriteAnimation* animation, int framesPerSecond);
 
 /**
- * \brief Set the value of N for N loop styles.
+ * \brief set the value of N for N loop styles.
  */
-SpriteAnimation SetSpriteAnimationLoops(SpriteAnimation* animation, int loop_count, bool usePingPong);
+spriteAnimation setSpriteAnimationLoops(spriteAnimation* animation, int loopCount, bool usePingPong);
 
 /**
- * \brief Draws the current sprite of the animation. If the animation is not playing, it will simply draw the "locked" frame of the animation until Reset/Start/Stop are called.
+ * \brief Draws the current particleSprite of the animation. If the animation is not playing, it will simply draw the "locked" frame of the animation until Reset/Start/Stop are called.
  */
-void DrawSpriteAnimation(float frametime, SpriteAnimation* animation, int posX, int posY, Color tint);
+void drawSpriteAnimation(float frametime, spriteAnimation* animation, int posX, int posY, Color tint);
 /**
- * \brief Draws the current sprite of the animation. If the animation is not playing, it will simply draw the "locked" frame of the animation until Reset/Start/Stop are called.
+ * \brief Draws the current particleSprite of the animation. If the animation is not playing, it will simply draw the "locked" frame of the animation until Reset/Start/Stop are called.
  */
-void DrawSpriteAnimationV(float frametime, SpriteAnimation* animation, Vector2 position, Color tint);
+void drawSpriteAnimationV(float frametime, spriteAnimation* animation, Vector2 position, Color tint);
 /**
- * \brief Draws the current sprite of the animation. If the animation is not playing, it will simply draw the "locked" frame of the animation until Reset/Start/Stop are called.
+ * \brief Draws the current particleSprite of the animation. If the animation is not playing, it will simply draw the "locked" frame of the animation until Reset/Start/Stop are called.
  */
-void DrawSpriteAnimationPro(float frametime, SpriteAnimation* animation, Rectangle dest, Vector2 origin, float rotation, Color tint);
+void drawSpriteAnimationPro(float frametime, spriteAnimation* animation, Rectangle dest, Vector2 origin, float rotation, Color tint);
 
 /**
- * \brief Reset all runtime values of SpriteAnimation except _playing.
+ * \brief Simple shorthand to get the current particleSprite.
  */
-void SpriteAnimationReset(SpriteAnimation* animation);
+sprite getCurrentSprite(spriteAnimation animation);
+
 /**
- * \brief Sets _playing = false.
+ * \brief Reset all runtime values of spriteAnimation except playing.
  */
-void SpriteAnimationStop(SpriteAnimation* animation);
+void spriteAnimationReset(spriteAnimation* animation);
 /**
- * \brief Sets _playing = true.
+ * \brief Sets playing = false.
  */
-void SpriteAnimationResume(SpriteAnimation* animation);
+void spriteAnimationStop(spriteAnimation* animation);
+/**
+ * \brief Sets playing = true.
+ */
+void spriteAnimationResume(spriteAnimation* animation);
 /**
  * \brief Calls ResetAnimation, then ResumeAnimation.
  */
-void SpriteAnimationStart(SpriteAnimation* animation);
+void spriteAnimationStart(spriteAnimation* animation);
 
 #endif

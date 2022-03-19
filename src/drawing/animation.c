@@ -12,159 +12,159 @@
 
 /// INTERNAL FUNCTIONS ///
 
-void AddTime(SpriteAnimation* animation, float frametime);
-void AdvanceFrame(SpriteAnimation* animation);
-void AnimationUpdatePrivates(SpriteAnimation* animation);
-void NewLoop(SpriteAnimation* animation);
+static void addTime(spriteAnimation* animation, float frametime);
+static void advanceFrame(spriteAnimation* animation);
+static void animationUpdatePrivates(spriteAnimation* animation);
+static void newLoop(spriteAnimation* animation);
 
-void AddTime(SpriteAnimation* animation, float frametime)
+static void addTime(spriteAnimation* animation, float frametime)
 {
-	animation->_seconds_on_frame += frametime;
-	while (animation->_seconds_on_frame >= animation->_seconds_per_frame)
+	animation->secondsOnFrame += frametime;
+	while (animation->secondsOnFrame >= animation->secondsPerFrame)
 	{
-		animation->_seconds_on_frame -= animation->_seconds_per_frame;
-		AdvanceFrame(animation);
+		animation->secondsOnFrame -= animation->secondsPerFrame;
+		advanceFrame(animation);
 
 		// account for floating point errors and weirdness
-		if (animation->_seconds_on_frame < 0)
-			animation->_seconds_on_frame = 0;
+		if (animation->secondsOnFrame < 0)
+			animation->secondsOnFrame = 0;
 	}
 }
 
-void AdvanceFrame(SpriteAnimation* animation)
+static void advanceFrame(spriteAnimation* animation)
 {
-	switch(animation->animation_type)
+	switch(animation->animationType)
 	{
-		case SAT_ONCE:
+		case SatOnce:
 		{
-			if (animation->_frame_current < animation->sprites_length - 1)
-				(animation->_frame_current)++;
-			else if (animation->_frame_current >= animation->sprites_length - 1)
+			if (animation->frameCurrent < animation->spritesLength - 1)
+				(animation->frameCurrent)++;
+			else if (animation->frameCurrent >= animation->spritesLength - 1)
 			{
-				animation->_playing = false;
+				animation->playing = false;
 			}
 			else
 			{
 				// error case.
 #ifdef PRINT_DEBUG
-				printf("ERR: Error case in SAT_ONCE: frame_current %d\n", animation->_frame_current);
+				printf("ERR: Error case in SatOnce: frame_current %d\n", animation->frameCurrent);
 #endif
 			}
 			break;	
 		}
-		case SAT_LOOPED:
+		case SatLooped:
 		{
-			if (animation->_frame_current < animation->sprites_length - 1)
-				(animation->_frame_current)++;
-			else if (animation->_frame_current == animation->sprites_length - 1)
-				animation->_frame_current = 0;
+			if (animation->frameCurrent < animation->spritesLength - 1)
+				(animation->frameCurrent)++;
+			else if (animation->frameCurrent == animation->spritesLength - 1)
+				animation->frameCurrent = 0;
 			else
 			{
 				// error case.
 #ifdef PRINT_DEBUG
-				printf("ERR: Error case in SAT_LOOPED: frame_current %d\t\n", animation->_frame_current);
+				printf("ERR: Error case in SatLooped: frame_current %d\t\n", animation->frameCurrent);
 #endif
 			}
 			break;
 		}
-		case SAT_PING_PONG:
+		case SatPingPong:
 		{
 			// if the pingpong is on the way "right" and not at the last frame yet,
 			// or it is on the way "left" and not at the first frame yet;
 			if (
-				(!animation->_ping_pong_reverse && (animation->_frame_current < animation->sprites_length - 1))
+				(!animation->pingPongReverse && (animation->frameCurrent < animation->spritesLength - 1))
 				||
-				(animation->_ping_pong_reverse && (animation->_frame_current > 0))
+				(animation->pingPongReverse && (animation->frameCurrent > 0))
 			)
 			{
-				animation->_frame_current += (animation->_ping_pong_reverse) ? -1: 1;
+				animation->frameCurrent += (animation->pingPongReverse) ? -1 : 1;
 			}
 			// else if we are at the extreme ends and its time to turn the ping pong around
 			else if (
-				(!animation->_ping_pong_reverse && (animation->_frame_current >= animation->sprites_length - 1))
+				(!animation->pingPongReverse && (animation->frameCurrent >= animation->spritesLength - 1))
 				||
-				(animation->_ping_pong_reverse && (animation->_frame_current <= 0))
+				(animation->pingPongReverse && (animation->frameCurrent <= 0))
 			)
 			{
-				animation->_ping_pong_reverse = !animation->_ping_pong_reverse;
-				animation->_frame_current += (animation->_ping_pong_reverse) ? -1: 1;
+				animation->pingPongReverse = !animation->pingPongReverse;
+				animation->frameCurrent += (animation->pingPongReverse) ? -1 : 1;
 			}
 			else
 			{
 				// error case
 #ifdef PRINT_DEBUG
-				printf("ERR: Error case in SAT_PING_PONG: frame_current %d\tping_pong_reverse %d\n", animation->_frame_current, animation->_ping_pong_reverse);
+				printf("ERR: Error case in SatPingPong: frame_current %d\tping_pong_reverse %d\n", animation->frameCurrent, animation->pingPongReverse);
 #endif
 			}
 			break;
 		}
-		case SAT_PING_PONG_ONCE:
+		case SatPingPongOnce:
 		{
-			if (!(animation->_ping_pong_reverse) && animation->_frame_current < animation->sprites_length - 1)
-				(animation->_frame_current)++;
-			else if (!(animation->_ping_pong_reverse) && animation->_frame_current >= animation->sprites_length - 1)
+			if (!(animation->pingPongReverse) && animation->frameCurrent < animation->spritesLength - 1)
+				(animation->frameCurrent)++;
+			else if (!(animation->pingPongReverse) && animation->frameCurrent >= animation->spritesLength - 1)
 			{
-				animation->_ping_pong_reverse = true;
-				(animation->_frame_current)--;
+				animation->pingPongReverse = true;
+				(animation->frameCurrent)--;
 			}
-			else if ((animation->_ping_pong_reverse) && animation->_frame_current > 0)
-				(animation->_frame_current)--;
-			else if (animation->_ping_pong_reverse && animation->_frame_current <= 0)
-				animation->_playing = false;
+			else if ((animation->pingPongReverse) && animation->frameCurrent > 0)
+				(animation->frameCurrent)--;
+			else if (animation->pingPongReverse && animation->frameCurrent <= 0)
+				animation->playing = false;
 			else
 			{
 				// error case
 #ifdef PRINT_DEBUG
-				printf("ERR: Error case in SAT_PING_PONG_ONCE: frame_current %d\tping_pong_reverse %d\n", animation->_frame_current, animation->_ping_pong_reverse);
+				printf("ERR: Error case in SatPingPongOnce: frame_current %d\tping_pong_reverse %d\n", animation->frameCurrent, animation->pingPongReverse);
 #endif
 			}
 			break;
 		}
-		case SAT_LOOPED_N:
+		case SatLoopedN:
 		{
-			if (animation->_frame_current < animation->sprites_length - 1)
-				(animation->_frame_current)++;
-			else if (animation->_frame_current == animation->sprites_length - 1)
+			if (animation->frameCurrent < animation->spritesLength - 1)
+				(animation->frameCurrent)++;
+			else if (animation->frameCurrent == animation->spritesLength - 1)
 			{
-				animation->_frame_current = 0;
-				NewLoop(animation);
+				animation->frameCurrent = 0;
+				newLoop(animation);
 			}
 			else
 			{
 				// error case.
 #ifdef PRINT_DEBUG
-				printf("ERR: Error case in SAT_LOOPED: frame_current %d\t\n", animation->_frame_current);
+				printf("ERR: Error case in SatLooped: frame_current %d\t\n", animation->frameCurrent);
 #endif
 			}
 			break;
 		}
-		case SAT_PING_PONG_N:
+		case SatPingPongN:
 		{
 			if (
-				(!animation->_ping_pong_reverse && (animation->_frame_current < animation->sprites_length - 1))
+				(!animation->pingPongReverse && (animation->frameCurrent < animation->spritesLength - 1))
 				||
-				(animation->_ping_pong_reverse && (animation->_frame_current > 0))
+				(animation->pingPongReverse && (animation->frameCurrent > 0))
 			)
 			{
-				animation->_frame_current += (animation->_ping_pong_reverse) ? -1: 1;
+				animation->frameCurrent += (animation->pingPongReverse) ? -1 : 1;
 			}
 			else if (
-				(!animation->_ping_pong_reverse && (animation->_frame_current >= animation->sprites_length - 1))
+				(!animation->pingPongReverse && (animation->frameCurrent >= animation->spritesLength - 1))
 				||
-				(animation->_ping_pong_reverse && (animation->_frame_current <= 0))
+				(animation->pingPongReverse && (animation->frameCurrent <= 0))
 			)
 			{
-				animation->_ping_pong_reverse = !animation->_ping_pong_reverse;
-				animation->_frame_current += (animation->_ping_pong_reverse) ? -1: 1;
+				animation->pingPongReverse = !animation->pingPongReverse;
+				animation->frameCurrent += (animation->pingPongReverse) ? -1 : 1;
 
-				if (!animation->_ping_pong_reverse)
-					NewLoop(animation);
+				if (!animation->pingPongReverse)
+					newLoop(animation);
 			}
 			else
 			{
 				// error case
 #ifdef PRINT_DEBUG
-				printf("ERR: Error case in SAT_PING_PONG: frame_current %d\tping_pong_reverse %d\n", animation->_frame_current, animation->_ping_pong_reverse);
+				printf("ERR: Error case in SatPingPong: frame_current %d\tping_pong_reverse %d\n", animation->frameCurrent, animation->pingPongReverse);
 #endif
 			}
 			break;
@@ -172,124 +172,159 @@ void AdvanceFrame(SpriteAnimation* animation)
 	}
 }
 
-void AnimationUpdatePrivates(SpriteAnimation* animation)
+static void animationUpdatePrivates(spriteAnimation* animation)
 {
-	animation->_seconds_on_frame = 0;
-	if (animation->frames_per_second != 0)
-		animation->_seconds_per_frame = 1.0f/animation->frames_per_second;
-	animation->_frame_current = 0;
+	animation->secondsOnFrame = 0;
+	if (animation->framesPerSecond != 0)
+		animation->secondsPerFrame = 1.0f / (float)(animation->framesPerSecond);
+	animation->frameCurrent = 0;
 }
 
-void NewLoop(SpriteAnimation* animation)
+static void newLoop(spriteAnimation* animation)
 {
-	if (animation->animation_type == SAT_LOOPED_N ||
-		animation->animation_type == SAT_PING_PONG_N)
+	if (animation->animationType == SatLoopedN ||
+		animation->animationType == SatPingPongN)
 	{
-		animation->_loops_left--;
-		if (animation->_loops_left <= 0)
+		animation->loopsLeft--;
+		if (animation->loopsLeft <= 0)
 		{
-			animation->_playing = false;
-			animation->_frame_current = 0;
+			animation->playing = false;
+			animation->frameCurrent = 0;
 		}
 	}	
 }
 
 /// REAL FUNCTIONS ///
 
-void DrawSpriteAnimationBase(float frametime, SpriteAnimation* animation)
+void drawSpriteAnimationBase(float frametime, spriteAnimation* animation)
 {
-	if (animation->_playing)
-		AddTime(animation, frametime);
+	if (animation->playing)
+		addTime(animation, frametime);
 }
 
-SpriteAnimation NewAnimation(int sprites_length, Sprite sprites[], int frames_per_second)
+spriteAnimation newAnimationFromSprites(int spritesLength, sprite sprites[], int framesPerSecond)
 {
-	SpriteAnimation animation;
-	animation.sprites = (Sprite*)malloc(sprites_length * sizeof(Sprite));
-	animation.sprites_length = sprites_length;
-	animation.frames_per_second = frames_per_second;
-	animation.loop_count = 1;
-	for(int i = 0; i < sprites_length; i++)
-		animation.sprites[i] = sprites[i];
+	spriteAnimation animation;
+	animation.baseSprite = sprites[0];
+	animation.spritesLength = spritesLength;
+	animation.framesPerSecond = framesPerSecond;
+	animation.loopCount = 1;
+	animation.sourcePositions = (Vector2*)malloc(sizeof(Vector2) * spritesLength);
+	for(int i = 0; i < spritesLength; i++)
+		animation.sourcePositions[i] = (Vector2){sprites[i].source.x, sprites[i].source.y};
 
 	// unspecified defaults
-	animation.animation_type = SAT_LOOPED;
-	animation._ping_pong_reverse = false;
-	animation._playing = true;
-	animation._loops_left = 0;
+	animation.animationType = SatLooped;
+	animation.pingPongReverse = false;
+	animation.playing = true;
+	animation.loopsLeft = 0;
 
 	// compute private fields
-	AnimationUpdatePrivates(&animation);
+	animationUpdatePrivates(&animation);
 	
 	return animation;
 }
 
-SpriteAnimation ChangeAnimationFramerate(SpriteAnimation* animation, int frames_per_second)
+spriteAnimation newAnimation(int spritesLength, sprite baseSprite, Vector2 sourcePositions[], int framesPerSecond)
 {
-	animation->frames_per_second = frames_per_second;
-	AnimationUpdatePrivates(animation);
+	spriteAnimation animation;
+	animation.baseSprite = baseSprite;
+	animation.spritesLength = spritesLength;
+	animation.framesPerSecond = framesPerSecond;
+	animation.loopCount = 1;
+	animation.sourcePositions = (Vector2*)malloc(sizeof(Vector2) * spritesLength);
+	for(int i = 0; i < spritesLength; i++)
+		animation.sourcePositions[i] = sourcePositions[i];
+
+	// unspecified defaults
+	animation.animationType = SatLooped;
+	animation.pingPongReverse = false;
+	animation.playing = true;
+	animation.loopsLeft = 0;
+
+	// compute private fields
+	animationUpdatePrivates(&animation);
+	
+	return animation;
+}
+
+
+spriteAnimation changeAnimationFramerate(spriteAnimation* animation, int framesPerSecond)
+{
+	animation->framesPerSecond = framesPerSecond;
+	animationUpdatePrivates(animation);
 	return *animation;
 }
 
-SpriteAnimation SetSpriteAnimationLoops(SpriteAnimation* animation, int loop_count, bool usePingPong)
+spriteAnimation setSpriteAnimationLoops(spriteAnimation* animation, int loopCount, bool usePingPong)
 {
 	if (usePingPong)
-		animation->animation_type = SAT_PING_PONG_N;
+		animation->animationType = SatPingPongN;
 	else
-		animation->animation_type = SAT_LOOPED_N;
-	animation->loop_count = loop_count;
-	animation->_loops_left = animation->loop_count;
+		animation->animationType = SatLoopedN;
+	animation->loopCount = loopCount;
+	animation->loopsLeft = animation->loopCount;
 	return *animation;
 }
 
-void DrawSpriteAnimation(float frametime, SpriteAnimation* animation, int posX, int posY, Color tint)
+void drawSpriteAnimation(float frametime, spriteAnimation* animation, int posX, int posY, Color tint)
 {
 	// not calling DrawSpriteBase since we are just preparing a call to DrawPro()
 
-	Sprite currentsprite = animation->sprites[animation->_frame_current];
+	sprite currentsprite = getCurrentSprite(*animation);
 	Rectangle dest = {posX, posY, currentsprite.width, currentsprite.height};
 	
-	DrawSpriteAnimationPro(frametime, animation, dest, GetCenterRelative(dest), 0.0f, tint);
+	drawSpriteAnimationPro(frametime, animation, dest, getRectCenterRelative(dest), 0.0f, tint);
 }
 
-void DrawSpriteAnimationV(float frametime, SpriteAnimation* animation, Vector2 position, Color tint)
+void drawSpriteAnimationV(float frametime, spriteAnimation* animation, Vector2 position, Color tint)
 {
 	// not calling DrawSpriteBase since we are just preparing a call to DrawPro()
 	
-	Sprite currentsprite = animation->sprites[animation->_frame_current];
+	sprite currentsprite = getCurrentSprite(*animation);
 	Rectangle dest = {position.x, position.y, currentsprite.width, currentsprite.height};
 	
-	DrawSpriteAnimationPro(frametime, animation, dest, GetCenterRelative(dest), 0.0f, tint);
+	drawSpriteAnimationPro(frametime, animation, dest, getRectCenterRelative(dest), 0.0f, tint);
 }
 
-void DrawSpriteAnimationPro(float frametime, SpriteAnimation* animation, Rectangle dest, Vector2 origin, float rotation, Color tint)
+void drawSpriteAnimationPro(float frametime, spriteAnimation* animation, Rectangle dest, Vector2 origin, float rotation, Color tint)
 {
-	DrawSpriteAnimationBase(frametime, animation);
+	drawSpriteAnimationBase(frametime, animation);
 	
-	DrawSpritePro(animation->sprites[animation->_frame_current], dest, origin, rotation, tint);
+	sprite currentsprite = getCurrentSprite(*animation);
+	drawSpritePro(currentsprite, dest, origin, rotation, tint);
 }
 
-void SpriteAnimationReset(SpriteAnimation* animation)
+sprite getCurrentSprite(spriteAnimation animation)
 {
-	animation->_frame_current = 0;
-	animation->_seconds_on_frame = false;
-	animation->_ping_pong_reverse = false;
-	animation->_playing = false;
-	animation->_loops_left = animation->loop_count;
+	sprite currentsprite = animation.baseSprite;
+	Vector2 pos = animation.sourcePositions[animation.frameCurrent];
+	currentsprite.source.x = pos.x;
+	currentsprite.source.y = pos.y;
+	return currentsprite;
 }
 
-void SpriteAnimationStop(SpriteAnimation* animation)
+void spriteAnimationReset(spriteAnimation* animation)
 {
-	animation->_playing = false;
+	animation->frameCurrent = 0;
+	animation->secondsOnFrame = false;
+	animation->pingPongReverse = false;
+	animation->playing = false;
+	animation->loopsLeft = animation->loopCount;
 }
 
-void SpriteAnimationResume(SpriteAnimation* animation)
+void spriteAnimationStop(spriteAnimation* animation)
 {
-	animation->_playing = true;
+	animation->playing = false;
 }
 
-void SpriteAnimationStart(SpriteAnimation* animation)
+void spriteAnimationResume(spriteAnimation* animation)
 {
-	SpriteAnimationReset(animation);
-	SpriteAnimationResume(animation);
+	animation->playing = true;
+}
+
+void spriteAnimationStart(spriteAnimation* animation)
+{
+	spriteAnimationReset(animation);
+	spriteAnimationResume(animation);
 }

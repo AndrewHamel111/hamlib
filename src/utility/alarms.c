@@ -1,57 +1,56 @@
-#define ALARM_REGISTRY
 #include "hamlib/alarm.h"
 #define REPEATING_ALARM_CARRIES_TIME
 
 #include <stdlib.h>
 
-void seta(alarm* _alarm)
+void seta(alarm* a)
 {
-	_alarm->flag = true;
-	_alarm->time = _alarm->time_initial;
-	if ((_alarm->onSet) != NULL)
-		(*(_alarm->onSet))();
+	a->flag = true;
+	a->time = a->timeInitial;
+	if ((a->onSet) != NULL)
+		(*(a->onSet))();
 }
 
-void setaonce(alarm* _alarm)
+void setaonce(alarm* a)
 {
-	if (!(_alarm->flag))
-		seta(_alarm);
+	if (!(a->flag))
+		seta(a);
 }
 
-void unseta(alarm* _alarm)
+void unseta(alarm* a)
 {
-	if (!(_alarm->flag)) return;
-
-	_alarm->flag = false;
-	_alarm->time = 0.0f;
+	if (!(a->flag)) return;
+	
+	a->flag = false;
+	a->time = 0.0f;
 }
 
-void skipa(alarm* _alarm)
+void skipa(alarm* a)
 {
-	if (!(_alarm->flag)) return;
+	if (!(a->flag)) return;
 
-	unseta(_alarm);
-	if (_alarm->onEnd != NULL)
-		(*(_alarm->onEnd))();
+	unseta(a);
+	if (a->onEnd != NULL)
+		(*(a->onEnd))();
 }
 
-void ticka(alarm* _alarm, float frametime)
+void ticka(alarm* a, float frametime)
 {
-	if (!(_alarm->flag)) return;
+	if (!(a->flag)) return;
+	
+	a->time -= frametime;
 
-	_alarm->time -= frametime;
-
-	if ((_alarm->time <= 0.0f))
+	if ((a->time <= 0.0f))
 	{
 
-		float temp = _alarm->time; // save the extra negative time to add to the alarm's timer for the next loop IF the alarm loops.
-		skipa(_alarm);
+		float temp = a->time; // save the extra negative time to add to the alarm's timer for the next loop IF the alarm loops.
+		skipa(a);
 		
-		if (_alarm->repeats)
+		if (a->repeats)
 		{
-			seta(_alarm);
+			seta(a);
 #ifdef REPEATING_ALARM_CARRIES_TIME
-			_alarm->time -= temp;
+			a->time -= temp;
 #endif
 		}
 	}
@@ -63,7 +62,7 @@ alarm createalarm(float time, bool repeats)
 	alarm.flag = false;
 	alarm.onEnd = alarm.onSet = NULL;
 	alarm.repeats = repeats;
-	alarm.time = alarm.time_initial = time;
+	alarm.time = alarm.timeInitial = time;
 
 	return alarm;
 }
@@ -71,37 +70,37 @@ alarm createalarm(float time, bool repeats)
 ////////////////////
 // alarm registry //
 /////.////.///./////
-alarm** registered_alarms;
-unsigned short alarms_length;
+alarm** registeredAlarms;
+unsigned short alarmsLength;
 
 void registera(alarm* a)
 {
-	if (alarms_length == 0)
+	if (alarmsLength == 0)
 	{
-		registered_alarms = (alarm**)malloc(sizeof(alarm*));
+		registeredAlarms = (alarm**)malloc(sizeof(alarm*));
 	}
 	else
 	{
-		alarms_length++;
-		registered_alarms = (alarm**)realloc(registered_alarms, alarms_length * sizeof(alarm*));
+		alarmsLength++;
+		registeredAlarms = (alarm**)realloc(registeredAlarms, alarmsLength * sizeof(alarm*));
 	}
-
-	registered_alarms[alarms_length] = a;
-	alarms_length++;
+	
+	registeredAlarms[alarmsLength] = a;
+	alarmsLength++;
 }
 
 void unregistera(alarm* a)
 {
-	if ((alarms_length == 1) && (registered_alarms[0] == a))
+	if ((alarmsLength == 1) && (registeredAlarms[0] == a))
 	{
 		unregisterall();
 		return;
 	}
 	
 	int aindex = -1;
-	for(int i = 0; (aindex == -1) && (i < alarms_length); i++)
+	for(int i = 0; (aindex == -1) && (i < alarmsLength); i++)
 	{
-		if (registered_alarms[i] == a)
+		if (registeredAlarms[i] == a)
 		{
 			aindex = i;
 		}
@@ -109,24 +108,24 @@ void unregistera(alarm* a)
 
 	if (aindex == -1) return;
 
-	for(int i = aindex; i < (alarms_length - 1); i++)
-		registered_alarms[i] = registered_alarms[i + 1];
+	for(int i = aindex; i < (alarmsLength - 1); i++)
+		registeredAlarms[i] = registeredAlarms[i + 1];
 
-	alarms_length--;
-	registered_alarms = (alarm**)realloc(registered_alarms, alarms_length * sizeof(alarm*));
+	alarmsLength--;
+	registeredAlarms = (alarm**)realloc(registeredAlarms, alarmsLength * sizeof(alarm*));
 }
 
 void unregisterall(void)
 {
-	free(registered_alarms);
-	alarms_length = 0;
+	free(registeredAlarms);
+	alarmsLength = 0;
 }
 
 
 void tickall(float frametime)
 {
-	for (int i = 0; i < alarms_length; i++)
+	for (int i = 0; i < alarmsLength; i++)
 	{
-		ticka(registered_alarms[i], frametime);
+		ticka(registeredAlarms[i], frametime);
 	}
 }

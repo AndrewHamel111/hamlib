@@ -15,7 +15,7 @@ HAMLIB_PATH = C:/Users/thelu/Documents/Projects/hamlib
 RAYLIB_INSTALL_PATH ?= $(DESTDIR)/lib
 RAYLIB_H_INSTALL_PATH ?= $(DESTDIR)/include
 RAYLIB_LIBTYPE        ?= STATIC
-BUILD_MODE            ?= RELEASE
+BUILD_MODE            ?= DEBUG
 USE_EXTERNAL_GLFW     ?= FALSE
 USE_WAYLAND_DISPLAY   ?= FALSE
 export PATH             := C:\raylib\mingw\bin;$(PATH)
@@ -79,6 +79,9 @@ endif
 # Define compiler flags:
 CFLAGS += -Wall -std=c99 -D_DEFAULT_SOURCE -Wno-missing-braces -Wunused-result
 CFLAGS += -Wextra -Wmissing-prototypes -Wno-varargs
+ifeq ($(BUILD_MODE), DEBUG)
+	CFLAGS += -g
+endif
 # -Wstrict-prototypes is the worst
 
 ifeq ($(PLATFORM),PLATFORM_DESKTOP)

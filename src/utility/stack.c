@@ -4,64 +4,64 @@
 #include <string.h>
 
 // Manangement
-Stack* CreateStack(unsigned char type_size)
+stack* createStack(unsigned char typeSize)
 {
-	Stack* newstack = (Stack*)malloc(sizeof(Stack));
-	newstack->type_size = type_size;
-	newstack->_topindex = -1;
-	newstack->stack_array = malloc(sizeof(void*) * MAX_STACK);
+	stack* newstack = (stack*)malloc(sizeof(stack));
+	newstack->typeSize = typeSize;
+	newstack->topindex = -1;
+	newstack->stackArray = malloc(sizeof(void*) * MAX_STACK);
 	for(int i = 0; i < MAX_STACK; i++)
-		newstack->stack_array[i] = NULL;
+		newstack->stackArray[i] = NULL;
 	return newstack;
 }
 
-void StackClear(Stack* stack)
+void stackClear(stack* s)
 {
 	for(int i = 0; i < MAX_STACK; i++)
-		free(stack->stack_array[i]);
-	stack->_topindex = -1;
+		free(s->stackArray[i]);
+	s->topindex = -1;
 }
 
-void StackFree(Stack* stack)
+void stackFree(stack* s)
 {
-	StackClear(stack);
-	free(stack->stack_array);
-	free(stack);
+	stackClear(s);
+	free(s->stackArray);
+	free(s);
 }
 
-// Add and Remove
-void* StackTop(Stack* stack)
+// add and removeNode
+void* stackTop(stack* s)
 {
-	if (StackSize(stack) == 0) return NULL;
-	return stack->stack_array[stack->_topindex];
+	if (stackSize(s) == 0) return NULL;
+	return s->stackArray[s->topindex];
 }
 
-void StackPop(Stack* stack)
+void stackPop(stack* s)
 {
-	if (StackSize(stack) == 0) return;
+	if (stackSize(s) == 0) return;
 
-	free(stack->stack_array[stack->_topindex]);
-	stack->_topindex--;
+	free(s->stackArray[s->topindex]);
+	s->topindex--;
 }
 
-unsigned char StackPush(Stack* stack, void* value)
+unsigned char stackPush(stack* s, void* voidPtr)
 {
-	if (stack->_topindex == MAX_STACK - 1) return MAX_STACK;
+	if (s->topindex == MAX_STACK - 1) return MAX_STACK;
 
-	stack->_topindex++;
-	stack->stack_array[stack->_topindex] = malloc(stack->type_size);
-	memcpy(stack->stack_array[stack->_topindex], value, stack->type_size);
+	s->topindex++;
+	s->stackArray[s->topindex] = malloc(s->typeSize);
+	memcpy(s->stackArray[s->topindex], voidPtr, s->typeSize);
 
-	return stack->_topindex + 1;
+	return s->topindex + 1;
 }
 
 // Info
-unsigned char StackSize(Stack* stack)
+unsigned char stackSize(stack* s)
 {
-	return stack->_topindex + 1;
+	return s->topindex + 1;
 }
 
-unsigned char StackTypeSize(Stack* stack)
+unsigned char stackTypeSize(stack* s)
 {
-	return stack->type_size;
+	return s->typeSize;
 }

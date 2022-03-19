@@ -1,91 +1,85 @@
 #include "hamlib/sprite.h"
-#include "hamlib.h"
 
 #include <stdlib.h>
 
 // debug
 #include <stdio.h>
 
-Sprite SetSourceRectangle(Sprite* sprite, Rectangle source)
+sprite setSourceRectangle(sprite* spr, Rectangle source)
 {
-	// TODO consider checking for "valid" rectangles
-	sprite->source = source;
-	sprite->width = source.width;
-	sprite->height = source.height;
+	spr->source = source;
+	spr->width = source.width;
+	spr->height = source.height;
 
-	return *sprite;
+	return *spr;
 }
 
-Sprite SetAtlas(Sprite* sprite, Texture2D atlas)
+sprite setAtlas(sprite* spr, Texture2D atlas)
 {
-	// TODO consider checking for "valid" atlas
-	sprite->atlas = atlas;
+	spr->atlas = atlas;
 
-	return *sprite;
+	return *spr;
 }
 
-Sprite NewSprite(Texture2D atlas, Rectangle source)
+sprite newSprite(Texture2D atlas, Rectangle source)
 {
-	// Sprite sprite = (Sprite){atlas, source, source.width, source.height};
-	Sprite sprite;
+	// particleSprite particleSprite = (particleSprite){atlas, source, source.width, source.height};
+	sprite sprite;
 	sprite.atlas = atlas;
 	sprite.source = source;
 	sprite.width = source.width;
 	sprite.height = source.height;
 
-	printf("LOG: new sprite created: atlas id %d\t source rect x = %.0f\ty = %.0f\tw = %.0f\th = %.0f\n", atlas.id, sprite.source.x, sprite.source.y, sprite.source.width, sprite.source.height);
+	printf("LOG: new particleSprite created: atlas id %d\t source rect x = %.0f\ty = %.0f\tw = %.0f\th = %.0f\n", atlas.id, sprite.source.x, sprite.source.y, sprite.source.width, sprite.source.height);
 
 	return sprite;
 }
 
-void DrawSprite(Sprite sprite, int posX, int posY, Color tint)
+void drawSprite(sprite spr, int posX, int posY, Color tint)
 {
-	Rectangle dest = {posX, posY, sprite.width, sprite.height};
+	Rectangle dest = {posX, posY, spr.width, spr.height};
 
-	// DrawSpritePro(sprite, dest, GetCenter(dest), 0.0f, tint);
-	// DrawSpritePro(sprite, dest, GetCenterRelative(dest), 0.0f, tint);
-	DrawSpritePro(sprite, dest, (Vector2){0,0}, 0.0f, tint);
+	// drawSpritePro(spr, dest, getRectCenter(dest), 0.0f, tint);
+	// drawSpritePro(spr, dest, getRectCenterRelative(dest), 0.0f, tint);
+	drawSpritePro(spr, dest, (Vector2) {0, 0}, 0.0f, tint);
 }
 
-void DrawSpriteV(Sprite sprite, Vector2 position, Color tint)
+void drawSpriteV(sprite spr, Vector2 position, Color tint)
 {
-	Rectangle dest = {position.x, position.y, sprite.width, sprite.height};
-
-	DrawSpritePro(sprite, dest, (Vector2){0,0}, 0.0f, tint);
+	Rectangle dest = {position.x, position.y, spr.width, spr.height};
+	
+	drawSpritePro(spr, dest, (Vector2) {0, 0}, 0.0f, tint);
 }
 
-void DrawSpritePro(Sprite sprite, Rectangle dest, Vector2 origin, float rotation, Color tint)
+void drawSpritePro(sprite spr, Rectangle dest, Vector2 origin, float rotation, Color tint)
 {
-	DrawTexturePro(sprite.atlas, sprite.source, dest, origin, rotation, tint);
+	DrawTexturePro(spr.atlas, spr.source, dest, origin, rotation, tint);
 }
 
-Sprite* SpriteArrayFromStripAtlas(Texture2D atlas, int cellCount, int cellWidth, int cellHeight)
+sprite* spriteArrayFromStripAtlas(Texture2D atlas, int cellCount, int cellWidth, int cellHeight)
 {
-	Sprite* sprites;
-	// int _i = atlas.width / cellWidth;
-	int _i = cellCount;
-
-	if ((atlas.width / cellWidth) < _i)
+	sprite* sprites;
+	
+	if ((atlas.width / cellWidth) < cellCount)
 		return 0;
 
-	sprites = (Sprite*)malloc(sizeof(Sprite) * _i);
-	for(int i = 0; i < _i; i++)
-		sprites[i] = NewSprite(atlas, (Rectangle){cellWidth * i, 0, cellWidth, cellHeight});
+	sprites = (sprite*)malloc(sizeof(sprite) * cellCount);
+	for(int i = 0; i < cellCount; i++)
+		sprites[i] = newSprite(atlas, (Rectangle) {cellWidth * i, 0, cellWidth, cellHeight});
 
 	return sprites;
 }
 
-Sprite* SpriteArrayFromStripAtlasVertical(Texture2D atlas, int cellCount, int cellWidth, int cellHeight)
+sprite* spriteArrayFromStripAtlasVertical(Texture2D atlas, int cellCount, int cellWidth, int cellHeight)
 {
-	Sprite* sprites;
-	int _i = cellCount;
+	sprite* sprites;
 
-	if ((atlas.height / cellHeight) < _i)
+	if ((atlas.height / cellHeight) < cellCount)
 		return 0;
 
-	sprites = (Sprite*)malloc(sizeof(Sprite) * _i);
-	for(int i = 0; i < _i; i++)
-		sprites[i] = NewSprite(atlas, (Rectangle){0, i * cellHeight, cellWidth, cellHeight});
+	sprites = (sprite*)malloc(sizeof(sprite) * cellCount);
+	for(int i = 0; i < cellCount; i++)
+		sprites[i] = newSprite(atlas, (Rectangle) {0, i * cellHeight, cellWidth, cellHeight});
 
 	return sprites;
 }

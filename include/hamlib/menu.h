@@ -6,8 +6,8 @@
  * @copyright Copyright (c) 2021
  */
 
-#ifndef MENU_H_
-#define MENU_H_
+#ifndef HAMLIB_MENU_H
+#define HAMLIB_MENU_H
 
 #include "raylib.h"
 
@@ -18,35 +18,35 @@ of size W * H. Indexes are left to right, top to bottom, i.e.
 0 1 2
 3 4 5
 6 7 8
-For ease of access, UIElement ElementAt(Menu menu, int x, int y)
-and                 UIElement* ElementRefAt(Menu menu, int x, int y)
+For ease of access, uiElement elementAt(menu menu, int x, int y)
+and                 uiElement* elementRefAt(menu menu, int x, int y)
 can be used to navigate the list.
 */
 
 /**
  * \brief A struct that contains override data for menu navigation. Specify indices for any of the components to override where navigating OFF a specific element leads.
- * \details Every UIElement has a UIElementNav struct with -1 for all values. When a value is set, for example left, the user navigating left of this element will lead to the specified index.
+ * \details Every uiElement has a uiElementNav struct with -1 for all values. When a value is set, for example left, the user navigating left of this element will lead to the specified index.
  * These values are meaningless without the context of a menu, but then again such is the case for UIElements in general.
  */
-typedef struct UIElementNav
+typedef struct uiElementNav
 {
 	signed char right;
 	signed char down;
 	signed char left;
 	signed char up;
-} UIElementNav;
+} uiElementNav;
 
-typedef enum ElementDrawMode
+typedef enum elementDrawMode
 {
-	DM_SPRITE = 1, DM_RECT = 2, DM_TEXT = 4, DM_NINESLICE = 8
-} ElementDrawMode;
+	DmSprite = 1, DmRect = 2, DmText = 4, DmNineslice = 8
+} elementDrawMode;
 
-typedef enum ElementHighlightMode
+typedef enum elementHighlightMode
 {
-	HM_COLOR, HM_SPRITESWAP
-} ElementHighlightMode;
+	HmColor, HmSpriteswap
+} elementHighlightMode;
 
-typedef struct UIElement
+typedef struct uiElement
 {
     Rectangle rectangle;
     char msg[64];
@@ -58,97 +58,97 @@ typedef struct UIElement
 
 	Texture2D sprite;
 
-	ElementDrawMode drawmode;
+	elementDrawMode drawmode;
 	NPatchInfo nfo;
 
-	ElementHighlightMode highlightmode;
+	elementHighlightMode highlightmode;
 	Texture2D highlightedsprite;
     
     bool isEmpty;
-    UIElementNav nav;
-} UIElement;
+    uiElementNav nav;
+} uiElement;
 
-typedef enum MenuWrapBehaviour
+typedef enum menuWrapBehaviour
 {
-	MW_WRAP = 1, MW_FALL = 2, MW_RISE = 4, MW_NONE = 8
-} MenuWrapBehaviour;
+	MwWrap = 1, MwFall = 2, MwRise = 4, MwNone = 8
+} menuWrapBehaviour;
 
-typedef struct Menu
+typedef struct menu
 {
-    UIElement* elements;
+    uiElement* elements;
     Vector2 sz;
-    unsigned char _sz;
+    unsigned char elementsCount;
     signed char index;
-    MenuWrapBehaviour wrapbehaviour;
+    menuWrapBehaviour wrapbehaviour;
 
 	bool isGridMenu;
 
 	signed char lastindex;
 	bool currentindexsetbymouse;
 	bool mousedisengaged;
-} Menu;
+} menu;
 
-// UIElement Functions
+// uiElement Functions
 /**
- * \brief Creates a Button UIElement.
+ * \brief Creates a button uiElement.
  */
-UIElement CreateUIElementButton(Rectangle, char*, void (*func)(void));
+uiElement createUiElementButton(Rectangle rectangle, char* string, void (*func)(void));
 /**
  * \brief Create a Empty UI Element object
  */
-UIElement CreateEmptyUIElement(void);
+uiElement createEmptyUiElement(void);
 /**
- * \brief Set the colors of the UIElement
+ * \brief set the colors of the uiElement
  */
-void SetUIElementColors(UIElement*, Color, Color, Color);
+void setUiElementColors(uiElement* element, Color color, Color textColor, Color highlightedColor);
 /**
- * \brief Set the UIElement's onSelect behaviour.
+ * \brief set the uiElement's onSelect behaviour.
  */
-void SetUIElementBehaviour(UIElement*, void (*func)(void));
+void setUiElementBehaviour(uiElement* element, void (*func)(void));
 /**
- * \brief Draw the UIElement.
+ * \brief Draw the uiElement.
  */
-void DrawUIElement(UIElement, bool);
+void drawUiElement(uiElement element, bool isSelected);
 
-// Menu Functions
+// menu Functions
 /**
  * \brief Manage a valid index state. 
  */
-void ClampMenuIndex(Menu*);
-void ClampMenuGrid(Menu*, Vector2);
+void clampMenuIndex(menu* mnu);
+void clampMenuGrid(menu* mnu, Vector2 d);
 /**
- * \brief Create a Menu from a UIElement list.
+ * \brief Create a menu from a uiElement list.
  */
-Menu CreateMenu(UIElement*, unsigned char);
+menu createMenu(uiElement* element, unsigned char sz);
 /**
- * \brief Create a Menu from a UIElement list.
+ * \brief Create a menu from a uiElement list.
  */
-Menu CreateGridMenu(UIElement*, Vector2);
+menu createGridMenu(uiElement* element, Vector2 gridSz);
 /**
- * \brief Perform the update function of each UIElement in the menu.
+ * \brief Perform the update function of each uiElement in the menu.
  */
-void UpdateMenu(Menu*);
+void updateMenu(menu* mnu);
 /**
- * \brief Draw each UIElement in the menu.
+ * \brief Draw each uiElement in the menu.
  */
-void DrawMenu(Menu);
+void drawMenu(menu mnu);
 /**
  * \brief Returns the element at the specified x, y position
  */
-UIElement ElementAt(Menu, int, int);
+uiElement elementAt(menu mnu, int x, int y);
 /**
  * \brief Returns a reference to the element at the specified x, y position
  */
-UIElement* ElementRefAt(Menu, int, int);
+uiElement* elementRefAt(menu mnu, int x, int y);
 
-void SetNavUp(UIElement*, signed char);
-void SetNavRight(UIElement*, signed char);
-void SetNavDown(UIElement*, signed char);
-void SetNavLeft(UIElement*, signed char);
+void setNavUp(uiElement* element, signed char i);
+void setNavRight(uiElement* element, signed char i);
+void setNavDown(uiElement* element, signed char i);
+void setNavLeft(uiElement* element, signed char i);
 /**
  * \brief Sets what element navigating FROM this element will lead to, for each direction.
  */
-void SetNav(UIElement*, signed char right, signed char down, signed char left, signed char up);
-bool HasCustomNav(UIElement);
+void setNav(uiElement* element, signed char right, signed char down, signed char left, signed char up);
+bool hasCustomNav(uiElement element);
 
 #endif

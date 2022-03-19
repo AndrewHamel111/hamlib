@@ -1,127 +1,226 @@
 #include "hamlib.h"
 
 #include <stdlib.h>
+#include "easings.h"
 
-#ifndef MAX_TWEENS
-	#define MAX_TWEENS 30
-#endif
+const int maxTweens = 30;
 
 typedef struct tween
 {
-	// TT_INT | TT_FLOAT | TT_VECTOR
-	enum { TT_INT, TT_FLOAT, TT_VECTOR } type;
+	// TweenInt, TweenFloat, TweenVector
+	enum { TweenInt, TweenFloat, TweenVector } type;
 
 	// current progress through the tween
 	float time;
 	// total duration of the tween
 	float duration;
+	
+	float (*easingFunction)(float,float,float,float);
+	
+	bool active;
 
 	union 
 	{
 		struct 
 		{
-			int* int_value;
-			int int_start;
-			int int_end;
+			int* intValue;
+			int intStart;
+			int intEnd;
 		};
 		struct 
 		{
-			float* float_value;
-			float float_start;
-			float float_end;
+			float* floatValue;
+			float floatStart;
+			float floatEnd;
 		};
 		struct 
 		{
-			Vector2* vector_value;
-			Vector2 vector_start;
-			Vector2 vector_end;
+			Vector2* vectorValue;
+			Vector2 vectorStart;
+			Vector2 vectorEnd;
 		};
 	};
 } tween;
 
-static tween* tweens[MAX_TWEENS] = {0};
+static tween *tweens = {0};
+static bool needsInit = true;
+static float (*nextTweenEasingMethodPtr)(float,float,float,float) = &EaseLinearNone;
 
-// TODO: actually implement these. the garbage that is here is just to silence warnings
+static void freeInnerTweenValues(tween* t);
+static void tweenInit(void);
+static void skipTweenToEnd(tween* t);
 
-void tween_update(float frametime)
+static void freeInnerTweenValues(tween* t)
 {
-	for(int i = 0; i < MAX_TWEENS; i++)
-	{
-		if (!tweens[i]) continue; // skip NULL ptr
+	if (t == NULL) return;
+	
+	(t)->easingFunction = NULL;
+	if (t->type == TweenInt)
+		t->intValue = NULL;
+	else if (t->type == TweenFloat)
+		t->floatValue = NULL;
+	else
+		t->vectorValue = NULL;
+}
 
-		tween* t = tweens[i];
+static void tweenInit(void)
+{
+	tweens = (tween*)malloc(sizeof(tween) * maxTweens);
+	for(int i = 0; i < maxTweens; i++)
+	{
+		tweens[i] = (tween){0};
+		tweens[i].active = false;
+		tweens[i].easingFunction = &EaseLinearNone;
+	}
+	needsInit = false;
+}
+
+void tweenUpdate(float frametime)
+{
+	if (needsInit)
+	{
+		return;
+	}
+	
+	for(int i = 0; i < maxTweens; i++)
+	{
+		if (!tweens[i].active) continue; // skip NULL ptr
+
+		tween* t = tweens + i;
 		t->time += frametime;
-		if (t->type == TT_INT)
+		float easeT = CLAMP(t->time, 0, t->duration);
+		if (t->type == TweenInt)
 		{
-			*(t->int_value) = LERP(t->int_start, t->int_end, CLAMP_NORMAL(t->time/t->duration));
+			*(t->intValue) = (int)((*(t->easingFunction))(easeT, (float)(t->intStart), (float)(t->intEnd - t->intStart), t->duration));
 		}
-		else if (t->type == TT_FLOAT)
+		else if (t->type == TweenFloat)
 		{
-			*(t->float_value) = LERP(t->float_start, t->float_end, CLAMP_NORMAL(t->time/t->duration));
+			*(t->floatValue) = (*(t->easingFunction))(easeT, t->floatStart, t->floatEnd - t->floatStart, t->duration);
 		}
-		else if (t->type == TT_VECTOR)
+		else if (t->type == TweenVector)
 		{
-			t->vector_value->x = LERP(t->vector_start.x, t->vector_end.x, CLAMP_NORMAL(t->time/t->duration));
-			t->vector_value->y = LERP(t->vector_start.y, t->vector_end.y, CLAMP_NORMAL(t->time/t->duration));
+			t->vectorValue->x = (*(t->easingFunction))(easeT, (float)(t->vectorStart.x), (float)(t->vectorEnd.x - t->vectorStart.x), t->duration);
+			t->vectorValue->y = (*(t->easingFunction))(easeT, (float)(t->vectorStart.y), (float)(t->vectorEnd.y - t->vectorStart.y), t->duration);
 		}
 
 		if (t->time > t->duration)
 		{
-			free(tweens[i]);
+			tweens[i].active = false;
 		}
 	}
 }
 
-void tween_int(int* value, int start, int end, float time)
+static void skipTweenToEnd(tween* t)
 {
-	tween t = {0};
-	t.type = TT_INT;
-	t.duration = time;
-	t.int_start = start;
-	t.int_end = end;
-	t.int_value = value;
-
-	int i;
-	for(i = 0; i < MAX_TWEENS && (!tweens[i]); i++); // when loops ends we will either have a valid index or be SOL
-
-	if (i >= MAX_TWEENS) return;
-
-	tweens[i] = (tween*)malloc(sizeof(tween));
-	*(tweens[i]) = t;
+	if (!t->active) return;
+	
+	switch(t->type)
+	{
+		case TweenInt:
+			*(t->intValue) = t->intEnd;
+			break;
+		case TweenFloat:
+			*(t->floatValue) = t->floatEnd;
+			break;
+		case TweenVector:
+			*(t->vectorValue) = t->vectorEnd;
+			break;
+	}
 }
 
-void tween_float(float* value, float start, float end, float time)
+void tweenClear(void)
 {
-	tween t = {0};
-	t.type = TT_FLOAT;
-	t.duration = time;
-	t.float_start = start;
-	t.float_end = end;
-	t.float_value = value;
-
-	int i;
-	for(i = 0; i < MAX_TWEENS && (!tweens[i]); i++); // when loops ends we will either have a valid index or be SOL
-
-	if (i >= MAX_TWEENS) return;
-
-	tweens[i] = (tween*)malloc(sizeof(tween));
-	*(tweens[i]) = t;
+	if (needsInit)
+	{
+		return;
+	}
+	
+	for(int i = 0; i < maxTweens; i++)
+	{
+		if (tweens[i].active)
+			skipTweenToEnd(tweens + i);
+		tweens[i] = (tween){0};
+	}
+	
+	free(tweens);
 }
 
-void tween_vector(Vector2* value, Vector2 start, Vector2 end, float time)
+void setNextTweenEasingMethod(float (*easingMethod)(float,float,float,float))
 {
+	if (easingMethod == NULL)
+		easingMethod = &EaseLinearNone;
+	
+	nextTweenEasingMethodPtr = easingMethod;
+}
+
+void tweenInt(int* value, int start, int end, float time)
+{
+	if (needsInit)
+	{
+		tweenInit();
+	}
+	
 	tween t = {0};
-	t.type = TT_VECTOR;
+	t.type = TweenInt;
+	t.active = true;
 	t.duration = time;
-	t.vector_start = start;
-	t.vector_end = end;
-	t.vector_value = value;
+	t.intStart = start;
+	t.intEnd = end;
+	t.intValue = value;
+	t.easingFunction = nextTweenEasingMethodPtr;
+	
+	int i = 0;
+	for(; (i < maxTweens) && tweens[i].active; i++); // when loops ends we will either have a valid index or be SOL
+	
+	if (i >= maxTweens) return;
+	
+	tweens[i] = t;
+}
 
-	int i;
-	for(i = 0; i < MAX_TWEENS && (!tweens[i]); i++); // when loops ends we will either have a valid index or be SOL
+void tweenFloat(float* value, float start, float end, float time)
+{
+	if (needsInit)
+	{
+		tweenInit();
+	}
+	
+	tween t = {0};
+	t.type = TweenFloat;
+	t.active = true;
+	t.duration = time;
+	t.floatStart = start;
+	t.floatEnd = end;
+	t.floatValue = value;
+	t.easingFunction = nextTweenEasingMethodPtr;
+	
+	int i = 0;
+	for(; (i < maxTweens) && tweens[i].active; i++); // when loops ends we will either have a valid index or be SOL
+	
+	if (i >= maxTweens) return;
+	
+	tweens[i] = t;
+}
 
-	if (i >= MAX_TWEENS) return;
+void tweenVector(Vector2* value, Vector2 start, Vector2 end, float time)
+{
+	if (needsInit)
+	{
+		tweenInit();
+	}
+	
+	tween t = {0};
+	t.type = TweenVector;
+	t.active = true;
+	t.duration = time;
+	t.vectorStart = start;
+	t.vectorEnd = end;
+	t.vectorValue = value;
+	t.easingFunction = nextTweenEasingMethodPtr;
 
-	tweens[i] = (tween*)malloc(sizeof(tween));
-	*(tweens[i]) = t;
+	int i = 0;
+	for(; (i < maxTweens) && tweens[i].active; i++); // when loops ends we will either have a valid index or be SOL
+
+	if (i >= maxTweens) return;
+
+	tweens[i] = t;
 }

@@ -1,5 +1,5 @@
-#ifndef ALARM_H_
-#define ALARM_H_
+#ifndef HAMLIB_ALARM_H
+#define HAMLIB_ALARM_H
 
 #if defined(__STDC__) && __STDC_VERSION__ >= 199901L
     #include <stdbool.h>
@@ -9,13 +9,13 @@
 #endif
 
 /**
- * \brief alarm struct, define ALARM_REGISTRY to include the global scope alarm registry.
+ * \brief alarm struct
  * 
  */
 typedef struct alarm
 {
 	float time;
-	float time_initial;
+	float timeInitial;
 	bool flag;
 	bool repeats;
 	void (*onSet)(void);
@@ -23,12 +23,12 @@ typedef struct alarm
 } alarm;
 
 /**
- * \brief Set the alarm and trigger onSet
+ * \brief set the alarm and trigger onSet
  */
 void seta(alarm*);
 
 /**
- * \brief Set the given alarm only if it's not already set
+ * \brief set the given alarm only if it's not already set
  */
 void setaonce(alarm*);
 
@@ -53,7 +53,7 @@ void ticka(alarm*, float);
 alarm createalarm(float time, bool repeats);
 
 /// REGISTRY ///
-#ifdef ALARM_REGISTRY
+#ifndef ALARM_REGISTRY
 void registera(alarm* a);
 void unregistera(alarm* a);
 void unregisterall(void);

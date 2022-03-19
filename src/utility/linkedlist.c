@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-node* GetTail(node* head)
+node* getTail(node* head)
 {
 	if (head == NULL)
 		return NULL;
@@ -17,7 +17,7 @@ node* GetTail(node* head)
 	return head;
 }
 
-node* GetTailAndCount(node* head, unsigned int* length)
+node* getTailAndCount(node* head, unsigned int* length)
 {
 	if (head == NULL)
 	{
@@ -37,26 +37,26 @@ node* GetTailAndCount(node* head, unsigned int* length)
 	return head;
 }
 
-void Set(node* node, void* value, int sz)
+void set(node* n, void* value, int sz)
 {
-	if (node == NULL)
+	if (n == NULL)
 		return;
 
-	free(node->value);
-	node->value = malloc(sz);
-	memcpy(node->value, value, sz);
-	node->sz = sz;
+	free(n->value);
+	n->value = malloc(sz);
+	memcpy(n->value, value, sz);
+	n->sz = sz;
 }
 
-node* Add(node* tail, void* value, int sz)
+node* add(node* tail, void* value, int sz)
 {	
-	if ((tail->value == NULL))
+	if (tail->value == NULL)
 	{
 		// Consider this the creation of a list
 		//printf("null tail is being converted to a list\n");
 		tail->prev = NULL;
 		tail->next = NULL;
-		Set(tail, value, sz);
+		set(tail, value, sz);
 		//printf("done\n");
 		return tail;
 	}
@@ -67,7 +67,7 @@ node* Add(node* tail, void* value, int sz)
 		// set pointers and value
 		newnode->next = tail->next;
 		newnode->prev = tail;
-		Set(newnode, value, sz);
+		set(newnode, value, sz);
 
 		// attach to list
 		if (tail->next != NULL)
@@ -79,16 +79,16 @@ node* Add(node* tail, void* value, int sz)
 	}
 }
 
-node* AddBefore(node* tail, void* value, int sz)
+node* addBefore(node* tail, void* value, int sz)
 {
 	// if we're trying to add "before" the head, just ignore this and put it after head.
 	if (tail->prev == NULL)
-		return Add(tail, value, sz);
+		return add(tail, value, sz);
 
-	return Add(tail->prev, value, sz);
+	return add(tail->prev, value, sz);
 }
 
-node* AddBeforeHead(node** head, void* value, int sz)
+node* addBeforeHead(node** head, void* value, int sz)
 {
 	if ((*head)->prev != NULL)
 		return NULL;
@@ -99,7 +99,7 @@ node* AddBeforeHead(node** head, void* value, int sz)
 	// set pointers and value
 	newhead->next = *head;
 	newhead->prev = NULL;
-	Set(newhead, value, sz);
+	set(newhead, value, sz);
 
 	// attach to list
 	(*head)->prev = newhead;
@@ -108,20 +108,20 @@ node* AddBeforeHead(node** head, void* value, int sz)
 	return (*head);
 }
 
-node* AddToTail(node* head, void* value, int sz)
+node* addToTail(node* head, void* value, int sz)
 {
-	return Add(GetTail(head), value, sz);
+	return add(getTail(head), value, sz);
 }
 
-void MoveNode(node* src, node* dest)
+void moveNode(node* src, node* dest)
 {
-	Add(dest, src->value, src->sz);
-	Remove(src);
+	add(dest, src->value, src->sz);
+	removeNode(src);
 }
 
-node* Remove(node* _node)
+node* removeNode(node* n)
 {
-	if (_node == NULL)
+	if (n == NULL)
 	{
 		//printf("node in remove is null.\n");
 		return NULL;
@@ -129,32 +129,32 @@ node* Remove(node* _node)
 
 	//printf("removing node\n");
 
-	if (_node->prev == NULL)
+	if (n->prev == NULL)
 	{
 		//printf("Tried to remove head using normal remove function.\n");
 		return NULL;
 	}
-	else if (_node->next == NULL)
+	else if (n->next == NULL)
 	{
 		// trying to remove a tail
-		node* tail = _node->prev;
+		node* tail = n->prev;
 		tail->next = NULL;
-		FreeNode(_node);
+		freeNode(n);
 		// return new tail
 		return tail;
 	}
 	else
 	{
-		_node->prev->next = _node->next;
-		_node->next->prev = _node->prev;
-		node* temp = _node->next;
-		FreeNode(_node);
+		n->prev->next = n->next;
+		n->next->prev = n->prev;
+		node* temp = n->next;
+		freeNode(n);
 		//printf("node freed\n");
 		return temp;
 	}
 }
 
-node* RemoveHead(node** head)
+node* removeHead(node** head)
 {
 	node* temp = *head;
 	if (temp->next != NULL) // if there's more after the head
@@ -165,28 +165,28 @@ node* RemoveHead(node** head)
 		(*head)->value = (*head)->next = (*head)->prev = NULL;
 		(*head)->sz = 0;
 	}
-	FreeNode(temp);
+	freeNode(temp);
 	return (*head);
 }
 
-node* RemoveAfter(node* head)
+node* removeAfter(node* head)
 {
-	Remove(head->next);
+	removeNode(head->next);
 	return head->next;
 }
 
-void FreeNode(node* node)
+void freeNode(node* n)
 {
-	free(node->value);
-	free(node);
+	free(n->value);
+	free(n);
 }
 
-void FreeList(node* head)
+void freeList(node* head)
 {
 	while(head != NULL)
 	{
 		node* temp = head;
 		head = head->next;
-		FreeNode(temp);
+		freeNode(temp);
 	}
 }

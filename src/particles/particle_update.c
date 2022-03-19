@@ -11,39 +11,38 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "raylib.h"
 #include "hamlib.h"
 #include "hamlib/particle.h"
 
-extern Particle* particles[];
-extern unsigned short particles_length;
+extern particle* particles[];
+extern unsigned short particlesLength;
 
-static const Vector2 particle_decel = (Vector2){10.0f, 10.0f};
-static const Vector2 particle_accel = (Vector2){10.0f, 10.0f};
-static const float particle_shrink = 2.0f;
-static const float particle_grow = 4.0f;
+static const Vector2 particleDecel = (Vector2){10.0f, 10.0f};
+static const Vector2 particleAccel = (Vector2){10.0f, 10.0f};
+static const float particleShrink = 2.0f;
+static const float particleGrow = 4.0f;
 
-static void DestroyParticle(Particle** ptr)
+static void destroyParticle(particle** ptr)
 {
 	free(*ptr);
 	*ptr = NULL;
 }
 
-void DestroyAllParticles(void)
+void destroyAllParticles(void)
 {
-	for(int i = 0; i < particles_length; i++)
+	for(int i = 0; i < particlesLength; i++)
 		if (particles[i] != NULL)
-			DestroyParticle(particles + i);
+			destroyParticle(particles + i);
 }
 
-void CreateParticle(Particle p)
+void createParticle(particle p)
 {
 	int index = -1;
 	float minlife = 100.0f;
-	int minlife_index = -1;
-	for(int i = 0; (i < particles_length) && (index == -1); i++)
+	int minlifeIndex = -1;
+	for(int i = 0; (i < particlesLength) && (index == -1); i++)
 	{
 		if (particles[i] == NULL)
 			index = i;
@@ -52,7 +51,7 @@ void CreateParticle(Particle p)
 			if (particles[i]->life < minlife)
 			{
 				minlife = particles[i]->life;
-				minlife_index = i;
+				minlifeIndex = i;
 			}
 		}
 	}
@@ -61,129 +60,129 @@ void CreateParticle(Particle p)
 	if (index == -1)
 	{
 		// destroy the particle closest to death
-		DestroyParticle(particles + minlife_index);
-		index = minlife_index;
+		destroyParticle(particles + minlifeIndex);
+		index = minlifeIndex;
 	}
 	
-	particles[index] = (Particle*)malloc(sizeof(Particle));
+	particles[index] = (particle*)malloc(sizeof(particle));
 	*particles[index] = p;
 }
 
-static void UpdateParticle(Particle** ptr, float frametime)
+static void updateParticle(particle** ptr, float frametime)
 {
-	Particle* p = *ptr;
+	particle* p = *ptr;
 	p->life -= frametime;
 	if (p->life < 0)
 	{
-		DestroyParticle(ptr);
+		destroyParticle(ptr);
 		return;
 	}
-	if (p->anim == STATIC) return;
+	if (p->anim == PaiStatic) return;
 
 	p->pos.x += (p->vel.x * frametime);
 	p->pos.y += (p->vel.y * frametime);
-	p->rotation += (p->rotation_per_second * frametime);
+	p->rotation += (p->rotationPerSecond * frametime);
 
-	if ((p->anim & TINT) == TINT)
+	if ((p->anim & PaiTint) == PaiTint)
 	{
-		p->color = tintcolor(p->color_initial, 1.0f - (p->life / p->life_initial));
+		p->color = tintcolor(p->colorInitial, 1.0f - (p->life / p->lifeInitial));
 	}
-	else if ((p->anim & TINT_TO) == TINT_TO)
+	else if ((p->anim & PaiTintTo) == PaiTintTo)
 	{
-		p->color = tintcolor(p->color_initial, 1.0f - (p->life / p->life_initial));
+		p->color = tintcolor(p->colorInitial, 1.0f - (p->life / p->lifeInitial));
 	}
 
-	if ((p->anim & FADE) == FADE)
+	if ((p->anim & PaiFade) == PaiFade)
 	{
-		p->color = fadecolor(p->color_initial, 1.0f - CLAMP(p->life, 0.0f, 1.0f));
+		p->color = Fade(p->colorInitial, 1.0f - CLAMP(p->life, 0.0f, 1.0f));
 		// note: use this instead for a really sick effect
-		// p->color = fadecolor(p->color_initial, 1.0f - CLAMP(p->life, 0.0f, 1.0f));
+		// p->color = Fade(p->colorInitial, 1.0f - CLAMP(p->life, 0.0f, 1.0f));
 	}
-	else if ((p->anim & FADE_IMMEDIATE) == FADE_IMMEDIATE)
+	else if ((p->anim & PaiFadeImmediate) == PaiFadeImmediate)
 	{
-		p->color = fadecolor(p->color_initial, 1.0f - (p->life / p->life_initial));
-	}
-
-	if ((p->anim & SHRINK) == SHRINK)
-	{
-		reducebyf(&(p->size), particle_shrink * frametime * p->anim_factor);
-	}
-	else if ((p->anim & GROW) == GROW)
-	{
-		increasebyf(&(p->size), particle_grow * frametime * p->anim_factor);
+		p->color = Fade(p->colorInitial, 1.0f - (p->life / p->lifeInitial));
 	}
 
-	if ((p->anim & DECELERATE) == DECELERATE)
+	if ((p->anim & PaiShrink) == PaiShrink)
 	{
-		reducebyf(&(p->vel.x), particle_decel.x * frametime * p->anim_factor);
-		reducebyf(&(p->vel.y), particle_decel.y * frametime * p->anim_factor);
+		reducebyf(&(p->size), particleShrink * frametime * p->animFactor);
 	}
-	else if ((p->anim & ACCELERATE) == ACCELERATE)
+	else if ((p->anim & PaiGrow) == PaiGrow)
 	{
-		increasebyf(&(p->vel.x), particle_accel.x * frametime * p->anim_factor);
-		increasebyf(&(p->vel.y), particle_accel.y * frametime * p->anim_factor);
+		increasebyf(&(p->size), particleGrow * frametime * p->animFactor);
 	}
-	else if ((p->anim & CUSTOM_ACC) == CUSTOM_ACC)
+
+	if ((p->anim & PaiDecelerate) == PaiDecelerate)
 	{
-		if (p->custom_acc.x < 0)
-			reducebyf(&(p->vel.x), p->custom_acc.x * frametime * p->anim_factor);
+		reducebyf(&(p->vel.x), particleDecel.x * frametime * p->animFactor);
+		reducebyf(&(p->vel.y), particleDecel.y * frametime * p->animFactor);
+	}
+	else if ((p->anim & PaiAccelerate) == PaiAccelerate)
+	{
+		increasebyf(&(p->vel.x), particleAccel.x * frametime * p->animFactor);
+		increasebyf(&(p->vel.y), particleAccel.y * frametime * p->animFactor);
+	}
+	else if ((p->anim & PaiCustomAcc) == PaiCustomAcc)
+	{
+		if (p->customAcc.x < 0)
+			reducebyf(&(p->vel.x), p->customAcc.x * frametime * p->animFactor);
 		else
-			increasebyf(&(p->vel.x), p->custom_acc.x * frametime * p->anim_factor);
-		if (p->custom_acc.y < 0)
-			reducebyf(&(p->vel.y), p->custom_acc.y * frametime * p->anim_factor);
+			increasebyf(&(p->vel.x), p->customAcc.x * frametime * p->animFactor);
+		if (p->customAcc.y < 0)
+			reducebyf(&(p->vel.y), p->customAcc.y * frametime * p->animFactor);
 		else
-			increasebyf(&(p->vel.y), p->custom_acc.y * frametime * p->anim_factor);
+			increasebyf(&(p->vel.y), p->customAcc.y * frametime * p->animFactor);
 	}
 }
 
-void UpdateParticles(float frametime)
+void updateParticles(float frametime)
 {
-	for(int i = 0; i < particles_length; i++)
+	for(int i = 0; i < particlesLength; i++)
 		if ((particles[i]) != NULL)
-			UpdateParticle(particles + i, frametime);
+			updateParticle(particles + i, frametime);
 }
 
-static void DrawParticle(Particle p)
+static void drawParticle(particle p)
 {
-	if (p.display_type == PIXEL)
+	if (p.displayType == PdiPixel)
 	{
 		DrawPixelV(p.pos, p.color);
 		//DrawRectangleV(p.pos, (Vector2){8,8}, p.pixel.color);
 	}
-	else if (p.display_type == SHAPE)
+	else if (p.displayType == PdiShape)
 	{
-		if (p.shape.shape_type == RECT)
+		if (p.particleShape.shapeType == PsiRect)
 		{
-			if (p.shape.shape_display_type == SOLID)
+			if (p.particleShape.shapeDisplayType == PsdiSolid)
 				DrawPoly(p.pos, 4, p.size, p.rotation, p.color);
 			else
 				DrawPolyLines(p.pos, 4, p.size, p.rotation, p.color);
 		}
-		else if (p.shape.shape_type == CIRCLE)
+		else if (p.particleShape.shapeType == PsiCircle)
 		{
-			if (p.shape.shape_display_type == SOLID)
+			if (p.particleShape.shapeDisplayType == PsdiSolid)
 				DrawCircleV(p.pos, p.size, p.color);
 			else
 				DrawCircleLines(p.pos.x, p.pos.y, p.size, p.color);
 		}
-		else if (p.shape.shape_type == TRIANGLE)
+		else if (p.particleShape.shapeType == PsiTriangle)
 		{
-			if (p.shape.shape_display_type == SOLID)
+			if (p.particleShape.shapeDisplayType == PsdiSolid)
 				DrawPoly(p.pos, 3, p.size, p.rotation, p.color);
 			else
 				DrawPolyLines(p.pos, 3, p.size, p.rotation, p.color);
 		}
 	}
-	else if (p.display_type == SPRITE)
+	else if (p.displayType == PdiPixel)
 	{
 		Rectangle r = (Rectangle){p.pos.x, p.pos.y, p.size, p.size};
-		DrawTexturePro(p.sprite.sprite, PureSource(p.sprite.sprite), r, GetCenterRelative(r), p.rotation, p.color);
+		DrawTexturePro(p.particleSprite.sprite, pureSource(p.particleSprite.sprite), r, getRectCenterRelative(r), p.rotation, p.color);
 	}
 }
 
-void DrawParticles(void)
+void drawParticles(void)
 {
-	for(int i = 0; i < particles_length; i++)
+	for(int i = 0; i < particlesLength; i++)
 		if (particles[i] != NULL)
-			DrawParticle(*(particles[i]));
+			drawParticle(*(particles[i]));
 }
