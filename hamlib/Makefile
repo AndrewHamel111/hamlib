@@ -11,7 +11,7 @@ SOURCE_FILES += $(wildcard src/drawing/*.c)
 RAYLIB_VERSION     ?= 3.8.0
 PLATFORM           ?= PLATFORM_DESKTOP
 DESTDIR ?= /usr/local
-HAMLIB_PATH = C:/Users/thelu/Documents/Projects/hamlib
+HAMLIB_PATH = C:/Users/thelu/Documents/Projects/hamlib/hamlib
 RAYLIB_INSTALL_PATH ?= $(DESTDIR)/lib
 RAYLIB_H_INSTALL_PATH ?= $(DESTDIR)/include
 RAYLIB_LIBTYPE        ?= STATIC
@@ -38,14 +38,14 @@ endif
 ifeq ($(PLATFORM),PLATFORM_DESKTOP)
     ifeq ($(PLATFORM_OS),LINUX)
         RAYLIB_PATH    = /home/thelu/raylib/raylib
-		HAMLIB_PATH	= /home/thelu/projects/hamlib
+		HAMLIB_PATH	= /home/thelu/projects/hamlib/hamlib
     endif
     ifeq ($(PLATFORM_OS),WINDOWS)
 		RAYLIB_PATH 	= C:\raylib\raylib
     endif
     ifeq ($(PLATFORM_OS),OSX)
     	RAYLIB_PATH = /usr/local/raylib
-		HAMLIB_PATH = /Users/hamel111/Documents/GitHub/hamlib
+		HAMLIB_PATH = /Users/hamel111/Documents/GitHub/hamlib/hamlib
     endif
 endif
 
