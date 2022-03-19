@@ -4,7 +4,6 @@
 // TODO replace hardcoded arrays of 8 with dynamic arrays. use a struct to encapsulate a dynamically sized array.
 
 // TODO Light Tasks
-// TODO Get this on VCS
 // TODO menuAdd returns a pointer to the added menu element
 // TODO add allowed background and fill sprites to Slider
 // TODO add background sprite to Textfield
