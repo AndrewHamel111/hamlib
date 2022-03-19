@@ -1,6 +1,7 @@
 #include "menu.h"
 #include "menu/shared.h"
 
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -8,6 +9,8 @@ static void updateMenuElement(menuElement* element, menu* mnu);
 /// \brief Call with null menuElement to remove highlight
 static void menuHighlightElement(menuElement* element, menu* mnu, bool highlightedByMouse);
 static void menuHightlightNone(menuElement *element, menu *mnu);
+
+static int getShiftedKey(int key);
 
 void menuUpdate(menu* mnu)
 {
@@ -125,6 +128,8 @@ static void updateMenuElement(menuElement* element, menu* mnu)
 			return;
 		}
 		
+		bool shiftHeld = IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT);
+		
 		int key;
 		while ( (key = GetKeyPressed()) != 0 )
 		{
@@ -154,9 +159,17 @@ static void updateMenuElement(menuElement* element, menu* mnu)
 				
 				if (key >= KEY_A && key <= KEY_Z)
 				{
-					if (!IsKeyDown(KEY_LEFT_SHIFT) && !IsKeyDown(KEY_RIGHT_SHIFT))
+					if (!shiftHeld)
 					{
-						key = 'a' + (key - 'A');
+						// here we use the "shifted key" because even though shift isn't being held, raylib's KEY values are actually the caps and we want the lower-case when they aren't holding shift.
+						key = getShiftedKey(key);
+					}
+				}
+				else
+				{
+					if (shiftHeld)
+					{
+						key = getShiftedKey(key);
 					}
 				}
 				// TODO: use this shift-based sieve to add the some other keys that currently can't be typed
@@ -199,4 +212,69 @@ static void menuHightlightNone(menuElement *element, menu *mnu)
 	if (e->onElementHighlightedOff != NULL)
 		e->onElementHighlightedOff(element);
 	mnu->highlightedElement = NULL;
+}
+
+static int getShiftedKey(int key)
+{
+	if (key >= 'A' && key <= 'Z')
+	{
+		return tolower(key);
+	}
+	
+	if (key >= 'a' && key <= 'z')
+	{
+		return toupper(key);
+	}
+	
+	switch (key)
+	{
+		case '1':
+			return '!';
+		case '2':
+			return '@';
+		case '3':
+			return '#';
+		case '4':
+			return '$';
+		case '5':
+			return '%';
+		case '6':
+			return '^';
+		case '7':
+			return '&';
+		case '8':
+			return '*';
+		case '9':
+			return '(';
+		case '0':
+			return ')';
+		case '-':
+			return '_';
+		case '=':
+			return '+';
+		case '\\':
+			return '|';
+		case ';':
+			return ':';
+		case '\'':
+			return '\"';
+		case ',':
+			return '<';
+		case '.':
+			return '>';
+		case '/':
+			return '?';
+		case '[':
+			return '{';
+		case ']':
+			return '}';
+		case '`':
+			return '~';
+		default:
+			// do nothing
+			break;
+	}
+	
+	// LOG here
+	return key; // no meaningful shift found, so we just return the base value.
 }

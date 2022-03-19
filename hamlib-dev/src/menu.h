@@ -1,24 +1,30 @@
 #ifndef HAMLIB_DEV_MENU_H
 #define HAMLIB_DEV_MENU_H
 
-// TODO replace hardcoded arrays of 8 with dynamic arrays. use a struct to encapsulate a dynamically sized array.
+// TODO find a better solution for the hardcoded arrays that isn't a linked-list.
 
 // TODO Light Tasks
 // TODO menuAdd returns a pointer to the added menu element
 // TODO add allowed background and fill sprites to Slider
 // TODO add background sprite to Textfield
+// TODO add an element name field so that menu elements can be more easily identified in debugging and code
 
 // TODO Medium Tasks
 // TODO Notched Slider that snaps to integer values (Caller specifies a range, and slider button / circle / bar will only fill to the absolute points)
 // TODO Buttons and Sliders can have their respective sprites added after creation. When no sprites are specified default primitives are used.
 // TODO Textfields can be navigated within to make changes to the middle of the field
 // TODO Add Label Text Alignment support
-// TODO menuElement font sizes are only a "max" size, the size is actually automatically determined by the element size.
+// TODO menuElement font sizes should only be a "max" size, the size actually automatically determined by the element.
 
 // TODO Heavy Tasks
 // TODO Layout groups to menus (Horizontal and Vertical Groups)
 // TODO Write a logging system. Comments that indicate a log should take place there will start with LOG
 // TODO Gamepad / Arrow Key support. Look to my nav example from previous iteration of menu system.
+
+// TODO Menu Management
+// TODO Menu Stack
+// TODO Menu Tweening Options
+// TODO Menu Editor that exports the code to create an editor
 
 // QUESTIONS AND IDEAS
 // Do we need a OnTextfieldEdited that is called every time the user navigates off of a textfield or is onHighlightedOff sufficient?
@@ -69,6 +75,7 @@ typedef void (*elementDrawOverride)(menuElement*, elementDrawData); // builtin f
 
 struct menuElement // buttons, labels, sliders, images, and more
 {
+	char elementName[64];
 	// A normalized position relative to the parent menu
 	Vector2 position;
 	// A normalized size relative to the parent menu

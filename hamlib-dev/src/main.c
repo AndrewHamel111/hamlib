@@ -136,7 +136,7 @@ void loadResources(void)
 void initMenus(void)
 {
 	// main menu init
-	setTextFieldAllowedCharacters(menuInputAllowedCharacters);
+//	setTextFieldAllowedCharacters(menuInputAllowedCharacters);
 	setMenuElementFont(GetFontDefault());
 	
 	mnuMain = menuCreate(V(0,0), V(screenWidth / 2, screenHeight));
