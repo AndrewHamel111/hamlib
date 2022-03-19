@@ -140,30 +140,30 @@ void initMenus(void)
 	setMenuElementFont(GetFontDefault());
 	
 	mnuMain = menuCreate(V(0,0), V(screenWidth / 2, screenHeight));
-	menuAdd(&mnuMain, menuElementCreateLabel(
+	menuAdd(&mnuMain, menuElementCreateLabel( "menu_label",
 		0.1f, 0.1f, 0.8f, 0.08f,
 		"HELLO WORLD", 1.0f, GetColor(0xffa549FF)
 	));
-	menuAdd(&mnuMain, menuElementCreateTextfield(
+	menuAdd(&mnuMain, menuElementCreateTextfield( "text_field",
 		0.1, 0.2, 0.8, 0.2, "TEST TEXT FIELD", 0.2, testTextfieldTextValue, 12,
 		GetColor(0xd0d2beff), GetColor(0x708e7eff), GetColor(0xe0e7d5ff), BLACK
 	));
-	menuAdd(&mnuMain, menuElementCreateSlider(
+	menuAdd(&mnuMain, menuElementCreateSlider( "slider_radius",
 		0.1, 0.4, 0.8, 0.08,
 		GetColor(0xd0d2beff), GetColor(0x708e7eff), GetColor(0xe0e7d5ff),
 		0.0f, SdtButton, radiusChanged
 	));
-	menuAdd(&mnuMain, menuElementCreateSlider(
+	menuAdd(&mnuMain, menuElementCreateSlider( "slider_rotation",
 		0.1, 0.5, 0.8, 0.08,
 		GetColor(0xd0d2beff), GetColor(0x708e7eff), GetColor(0xe0e7d5ff),
 		0.0f, SdtCircle, rotationChanged
 	));
-	menuAdd(&mnuMain, menuElementCreateSlider(
+	menuAdd(&mnuMain, menuElementCreateSlider( "slider_sides",
 		0.1, 0.6, 0.8, 0.08,
 		GetColor(0xd0d2beff), GetColor(0x708e7eff), GetColor(0xe0e7d5ff),
 		0.0f, SdtBar, sideCountChanged
 	));
-	menuAdd(&mnuMain, menuElementCreateButton(
+	menuAdd(&mnuMain, menuElementCreateButton( "button_quit",
 		0.1f, 0.8, 0.8, 0.1,
 		GRAY, quitButtonPressed, "Quit", GetColor(0xd43e43FF), 0.5
 	));

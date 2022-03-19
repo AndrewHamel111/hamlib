@@ -21,8 +21,10 @@ menu menuCreate(Vector2 position, Vector2 size)
 	return mnu;
 }
 
-void menuAdd(menu* mnu, menuElement element)
+menuElement* menuAdd(menu* mnu, menuElement element)
 {
+	menuElement* value = NULL;
+	
 	for(int i = 0; i < MENU_LENGTH; i++)
 	{
 		if (mnu->elementIsValid[i]) // search for an empty space to put the element
@@ -32,8 +34,10 @@ void menuAdd(menu* mnu, menuElement element)
 		mnu->list[i] = element;
 		mnu->elementIsValid[i] = true;
 		
+		value = mnu->list + i;
+		
 		if (element.menuElementType == MetImage || element.menuElementType == MetAnimation)
-			return;
+			break;
 		
 		// for elements with text, we adjust the font size, so it fits
 		// TODO put the auto font size changing here. Generalize elementDrawData modifications in Update / Draw to things for drawUtils and call on them here
@@ -41,7 +45,7 @@ void menuAdd(menu* mnu, menuElement element)
 		break;
 	}
 	
-	// if we reach this code, an error has occurred, since the menu didn't have any elements marked as invalid.
+	return value;
 }
 
 void setMenuElementOverrides(elementDrawOverride drawFunction)

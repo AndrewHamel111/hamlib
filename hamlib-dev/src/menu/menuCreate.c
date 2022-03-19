@@ -3,48 +3,50 @@
 
 #include <string.h>
 
-static menuElement menuElementCreateBase(Vector2 position, Vector2 size, enum elementType type);
+static menuElement menuElementCreateBase(char* elementName, Vector2 position, Vector2 size, enum elementType type);
 
-static menuElement menuElementCreateBase(Vector2 position, Vector2 size, enum elementType type)
+static menuElement menuElementCreateBase(char* elementName, Vector2 position, Vector2 size, enum elementType type)
 {
 	menuElement element = {.position = position, .size = size, .menuElementType = type, .drawFunctionOverride = newElementDrawOverride};
+	
+	strcpy(element.elementName, elementName);
 	
 	return element;
 }
 
-menuElement menuElementCreateLabel(float positionX, float positionY, float sizeX, float sizeY, char* label, float fontSize, Color color)
+menuElement menuElementCreateLabel(char* elementName, float positionX, float positionY, float sizeX, float sizeY, char* label, float fontSize, Color color)
 {
-	return menuElementCreateLabelV((Vector2){positionX, positionY}, (Vector2){sizeX, sizeY}, label, fontSize, color);
+	return menuElementCreateLabelV(elementName, (Vector2){positionX, positionY}, (Vector2){sizeX, sizeY}, label, fontSize, color);
 }
 
-menuElement menuElementCreateImage(float positionX, float positionY, float sizeX, float sizeY, Texture2D image, Rectangle sourceRectangle, Color tint)
+menuElement menuElementCreateImage(char* elementName, float positionX, float positionY, float sizeX, float sizeY, Texture2D image, Rectangle sourceRectangle, Color tint)
 {
-	return menuElementCreateImageV((Vector2){positionX, positionY}, (Vector2){sizeX, sizeY}, image, sourceRectangle, tint);
+	return menuElementCreateImageV(elementName, (Vector2){positionX, positionY}, (Vector2){sizeX, sizeY}, image, sourceRectangle, tint);
 }
 
-menuElement menuElementCreateAnimation(float positionX, float positionY, float sizeX, float sizeY, spriteAnimation animation, Color tint)
+menuElement menuElementCreateAnimation(char* elementName, float positionX, float positionY, float sizeX, float sizeY, spriteAnimation animation, Color tint)
 {
-	return menuElementCreateAnimationV((Vector2){positionX, positionY}, (Vector2){sizeX, sizeY}, animation, tint);
+	return menuElementCreateAnimationV(elementName, (Vector2){positionX, positionY}, (Vector2){sizeX, sizeY}, animation, tint);
 }
 
-menuElement menuElementCreateButton(float positionX, float positionY, float sizeX, float sizeY, Color buttonTint, buttonAction onPressed, char* buttonText, Color buttonTextColor, float buttonTextFontSize)
+menuElement menuElementCreateButton(char* elementName, float positionX, float positionY, float sizeX, float sizeY, Color buttonTint, buttonAction onPressed, char* buttonText, Color buttonTextColor, float buttonTextFontSize)
 {
-	return menuElementCreateButtonV((Vector2){positionX, positionY}, (Vector2){sizeX, sizeY}, buttonTint, onPressed, buttonText, buttonTextColor, buttonTextFontSize);
+	return menuElementCreateButtonV(elementName, (Vector2){positionX, positionY}, (Vector2){sizeX, sizeY}, buttonTint, onPressed, buttonText, buttonTextColor, buttonTextFontSize);
 }
 
-menuElement menuElementCreateSlider(float positionX, float positionY, float sizeX, float sizeY, Color sliderBackgroundColor, Color sliderFillColor, Color sliderExtraColor, float initialValue, sliderDisplayEnum displayType, sliderAction onSliderValueChanged)
+menuElement menuElementCreateSlider(char* elementName, float positionX, float positionY, float sizeX, float sizeY, Color sliderBackgroundColor, Color sliderFillColor, Color sliderExtraColor, float initialValue, sliderDisplayEnum displayType, sliderAction onSliderValueChanged)
 {
-	return menuElementCreateSliderV((Vector2){positionX, positionY}, (Vector2){sizeX, sizeY}, sliderBackgroundColor, sliderFillColor, sliderExtraColor, initialValue, displayType, onSliderValueChanged);
+	return menuElementCreateSliderV(elementName, (Vector2){positionX, positionY}, (Vector2){sizeX, sizeY}, sliderBackgroundColor, sliderFillColor, sliderExtraColor, initialValue, displayType, onSliderValueChanged);
 }
 
-menuElement menuElementCreateTextfield(float positionX, float positionY, float sizeX, float sizeY, char* label, float labelFontSize, char* value, int maxLength, Color backgroundColor, Color highlightColor, Color labelColor, Color inputTextColor)
+menuElement menuElementCreateTextfield(char* elementName, float positionX, float positionY, float sizeX, float sizeY, char* label, float labelFontSize, char* value, int maxLength, Color backgroundColor, Color highlightColor, Color labelColor, Color inputTextColor)
 {
-	return menuElementCreateTextfieldV((Vector2){positionX, positionY}, (Vector2){sizeX, sizeY}, label, labelFontSize, value, maxLength, backgroundColor, highlightColor, labelColor, inputTextColor);
+	return menuElementCreateTextfieldV(elementName, (Vector2){positionX, positionY}, (Vector2){sizeX, sizeY}, label, labelFontSize, value, maxLength, backgroundColor, highlightColor, labelColor, inputTextColor);
 }
 
-menuElement menuElementCreateLabelV(Vector2 position, Vector2 size, char* label, float fontSize, Color color)
+menuElement menuElementCreateLabelV(char* elementName, Vector2 position, Vector2 size, char* label, float fontSize, Color color)
 {
-	menuElement element = menuElementCreateBase(position, size, MetLabel);
+	menuElement element = menuElementCreateBase(elementName, position, size, MetLabel);
 	
 	element.position = position;
 	element.size = size;
@@ -58,9 +60,9 @@ menuElement menuElementCreateLabelV(Vector2 position, Vector2 size, char* label,
 	return element;
 }
 
-menuElement menuElementCreateImageV(Vector2 position, Vector2 size, Texture2D image, Rectangle sourceRectangle, Color tint)
+menuElement menuElementCreateImageV(char* elementName, Vector2 position, Vector2 size, Texture2D image, Rectangle sourceRectangle, Color tint)
 {
-	menuElement element = menuElementCreateBase(position, size, MetImage);
+	menuElement element = menuElementCreateBase(elementName, position, size, MetImage);
 	
 	element.position = position;
 	element.size = size;
@@ -73,9 +75,9 @@ menuElement menuElementCreateImageV(Vector2 position, Vector2 size, Texture2D im
 	return element;
 }
 
-menuElement menuElementCreateAnimationV(Vector2 position, Vector2 size, spriteAnimation animation, Color tint)
+menuElement menuElementCreateAnimationV(char* elementName, Vector2 position, Vector2 size, spriteAnimation animation, Color tint)
 {
-	menuElement element = menuElementCreateBase(position, size, MetAnimation);
+	menuElement element = menuElementCreateBase(elementName, position, size, MetAnimation);
 	
 	element.position = position;
 	element.size = size;
@@ -87,9 +89,9 @@ menuElement menuElementCreateAnimationV(Vector2 position, Vector2 size, spriteAn
 	return element;
 }
 
-menuElement menuElementCreateButtonV(Vector2 position, Vector2 size, Color buttonTint, buttonAction onPressed, char* buttonText, Color buttonTextColor, float buttonTextFontSize)
+menuElement menuElementCreateButtonV(char* elementName, Vector2 position, Vector2 size, Color buttonTint, buttonAction onPressed, char* buttonText, Color buttonTextColor, float buttonTextFontSize)
 {
-	menuElement element = menuElementCreateBase(position, size, MetButton);
+	menuElement element = menuElementCreateBase(elementName, position, size, MetButton);
 	
 	element.position = position;
 	element.size = size;
@@ -106,9 +108,9 @@ menuElement menuElementCreateButtonV(Vector2 position, Vector2 size, Color butto
 	return element;
 }
 
-menuElement menuElementCreateSliderV(Vector2 position, Vector2 size, Color sliderBackgroundColor, Color sliderFillColor, Color sliderExtraColor, float initialValue, sliderDisplayEnum displayType, sliderAction onSliderValueChanged)
+menuElement menuElementCreateSliderV(char* elementName, Vector2 position, Vector2 size, Color sliderBackgroundColor, Color sliderFillColor, Color sliderExtraColor, float initialValue, sliderDisplayEnum displayType, sliderAction onSliderValueChanged)
 {
-	menuElement element = menuElementCreateBase(position, size, MetSlider);
+	menuElement element = menuElementCreateBase(elementName, position, size, MetSlider);
 	
 	element.position = position;
 	element.size = size;
@@ -126,9 +128,9 @@ menuElement menuElementCreateSliderV(Vector2 position, Vector2 size, Color slide
 	return element;
 }
 
-menuElement menuElementCreateTextfieldV(Vector2 position, Vector2 size, char* label, float labelFontSize, char* value, int maxLength, Color backgroundColor, Color highlightColor, Color labelColor, Color inputTextColor)
+menuElement menuElementCreateTextfieldV(char* elementName, Vector2 position, Vector2 size, char* label, float labelFontSize, char* value, int maxLength, Color backgroundColor, Color highlightColor, Color labelColor, Color inputTextColor)
 {
-	menuElement element = menuElementCreateBase(position, size, MetTextfield);
+	menuElement element = menuElementCreateBase(elementName, position, size, MetTextfield);
 	
 	element.position = position;
 	element.size = size;

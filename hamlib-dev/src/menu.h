@@ -4,10 +4,8 @@
 // TODO find a better solution for the hardcoded arrays that isn't a linked-list.
 
 // TODO Light Tasks
-// TODO menuAdd returns a pointer to the added menu element
 // TODO add allowed background and fill sprites to Slider
 // TODO add background sprite to Textfield
-// TODO add an element name field so that menu elements can be more easily identified in debugging and code
 
 // TODO Medium Tasks
 // TODO Notched Slider that snaps to integer values (Caller specifies a range, and slider button / circle / bar will only fill to the absolute points)
@@ -192,21 +190,21 @@ typedef struct menu
 menu menuCreate(Vector2 position, Vector2 size);
 void menuUpdate(menu* mnu);
 void menuDraw(menu mnu);
-void menuAdd(menu* mnu, menuElement element);
+menuElement* menuAdd(menu* mnu, menuElement element);
 
-menuElement menuElementCreateLabel(float positionX, float positionY, float sizeX, float sizeY, char* label, float fontSize, Color color);
-menuElement menuElementCreateImage(float positionX, float positionY, float sizeX, float sizeY, Texture2D image, Rectangle sourceRectangle, Color tint);
-menuElement menuElementCreateAnimation(float positionX, float positionY, float sizeX, float sizeY, spriteAnimation animation, Color tint);
-menuElement menuElementCreateButton(float positionX, float positionY, float sizeX, float sizeY, Color buttonTint, buttonAction onPressed, char* buttonText, Color buttonTextColor, float buttonTextFontSize);
-menuElement menuElementCreateSlider(float positionX, float positionY, float sizeX, float sizeY, Color sliderBackgroundColor, Color sliderFillColor, Color sliderExtraColor, float initialValue, sliderDisplayEnum displayType, sliderAction onSliderValueChanged);
-menuElement menuElementCreateTextfield(float positionX, float positionY, float sizeX, float sizeY, char* label, float labelFontSize, char* value, int maxLength, Color backgroundColor, Color highlightColor, Color labelColor, Color inputTextColor);
+menuElement menuElementCreateLabel(char* elementName, float positionX, float positionY, float sizeX, float sizeY, char* label, float fontSize, Color color);
+menuElement menuElementCreateImage(char* elementName, float positionX, float positionY, float sizeX, float sizeY, Texture2D image, Rectangle sourceRectangle, Color tint);
+menuElement menuElementCreateAnimation(char* elementName, float positionX, float positionY, float sizeX, float sizeY, spriteAnimation animation, Color tint);
+menuElement menuElementCreateButton(char* elementName, float positionX, float positionY, float sizeX, float sizeY, Color buttonTint, buttonAction onPressed, char* buttonText, Color buttonTextColor, float buttonTextFontSize);
+menuElement menuElementCreateSlider(char* elementName, float positionX, float positionY, float sizeX, float sizeY, Color sliderBackgroundColor, Color sliderFillColor, Color sliderExtraColor, float initialValue, sliderDisplayEnum displayType, sliderAction onSliderValueChanged);
+menuElement menuElementCreateTextfield(char* elementName, float positionX, float positionY, float sizeX, float sizeY, char* label, float labelFontSize, char* value, int maxLength, Color backgroundColor, Color highlightColor, Color labelColor, Color inputTextColor);
 
-menuElement menuElementCreateLabelV(Vector2 position, Vector2 size, char* label, float fontSize, Color color);
-menuElement menuElementCreateImageV(Vector2 position, Vector2 size, Texture2D image, Rectangle sourceRectangle, Color tint);
-menuElement menuElementCreateAnimationV(Vector2 position, Vector2 size, spriteAnimation animation, Color tint);
-menuElement menuElementCreateButtonV(Vector2 position, Vector2 size, Color buttonTint, buttonAction onPressed, char* buttonText, Color buttonTextColor, float buttonTextFontSize);
-menuElement menuElementCreateSliderV(Vector2 position, Vector2 size, Color sliderBackgroundColor, Color sliderFillColor, Color sliderExtraColor, float initialValue, sliderDisplayEnum displayType, sliderAction onSliderValueChanged);
-menuElement menuElementCreateTextfieldV(Vector2 position, Vector2 size, char* label, float labelFontSize, char* value, int maxLength, Color backgroundColor, Color highlightColor, Color labelColor, Color inputTextColor);
+menuElement menuElementCreateLabelV(char* elementName, Vector2 position, Vector2 size, char* label, float fontSize, Color color);
+menuElement menuElementCreateImageV(char* elementName, Vector2 position, Vector2 size, Texture2D image, Rectangle sourceRectangle, Color tint);
+menuElement menuElementCreateAnimationV(char* elementName, Vector2 position, Vector2 size, spriteAnimation animation, Color tint);
+menuElement menuElementCreateButtonV(char* elementName, Vector2 position, Vector2 size, Color buttonTint, buttonAction onPressed, char* buttonText, Color buttonTextColor, float buttonTextFontSize);
+menuElement menuElementCreateSliderV(char* elementName, Vector2 position, Vector2 size, Color sliderBackgroundColor, Color sliderFillColor, Color sliderExtraColor, float initialValue, sliderDisplayEnum displayType, sliderAction onSliderValueChanged);
+menuElement menuElementCreateTextfieldV(char* elementName, Vector2 position, Vector2 size, char* label, float labelFontSize, char* value, int maxLength, Color backgroundColor, Color highlightColor, Color labelColor, Color inputTextColor);
 
 /// Override default values for uncommon fields, only applies to menuElements created after this set call. Set a parameter to NULL to unset a previous value and guarantee use of the default functionality.
 /// \param drawFunction
