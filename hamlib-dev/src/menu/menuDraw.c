@@ -18,7 +18,12 @@ static void drawTextfield(menuElement element, elementDrawData data);
 
 void menuDraw(menu mnu)
 {
-	DrawRectangle(mnu.position.x, mnu.position.y, mnu.size.x, mnu.size.y, Fade(BLACK, 0.025f));
+	if (mnu.state == MNU_CLOSED)
+	{
+		return;
+	}
+	
+	DrawRectangle(mnu.position.x, mnu.position.y, mnu.size.x, mnu.size.y, (Color){0xf9,0xf9,0xf9,0xff});
 	
 	for (int i = 0; i < MENU_LENGTH; i++)
 	{
@@ -114,12 +119,13 @@ static void drawButton(menuElement element, elementDrawData data)
 		DrawTextureNPatch(texButton, nfoButton, data.shadowRect, data.origin, 0.0f, data.shadowColor);
 	}
 	
-	if (data.dip)
+	// we test menuOpen separately for the simple reason that elements which are on an opening or closing menu should still be drawn but should not be effected by dip. Consider moving menuOpen into the dip assignment.
+	if (data.dip && data.menuOpen)
 	{
 		data.rect = data.shadowRect;
 		buttonTint = getPressedColor(buttonTint);
 	}
-	else if (element.highlighted)
+	else if (element.highlighted && data.menuOpen)
 	{
 		buttonTint = getHighlightColor(buttonTint);
 	}
@@ -154,7 +160,7 @@ static void drawSlider(menuElement element, elementDrawData data)
 		
 		getSliderButtonInfo(data.rect, element.sliderValue, &backgroundRect, &fillRect, &buttonRect);
 		
-		data.dip = CheckCollisionPointRec(mousePosition, buttonRect);
+		data.dip = CheckCollisionPointRec(mousePosition, buttonRect) && mouseIsDown && data.menuOpen;
 		
 		// Drawing step
 		DrawRectangleRec(backgroundRect, element.sliderBackgroundColor);
@@ -264,8 +270,8 @@ elementDrawData getDrawData(menuElement* elementPtr, menu mnu)
 	menuElement element = *elementPtr;
 	
 	// calculate absolute position and size of element
-	Vector2 elementPosition;
-	Vector2 elementSize;
+	Vector2 elementPosition = {0};
+	Vector2 elementSize = {0};
 	getMenuElementPositionAndSize(element, mnu, &elementPosition, &elementSize);
 	Rectangle elementRect = {
 		elementPosition.x,
@@ -295,7 +301,8 @@ elementDrawData getDrawData(menuElement* elementPtr, menu mnu)
 		.shadowRect = elementShadowRect,
 		.shadowColor = colorShadow,
 		.shadow = shadow,
-		.dip = buttonDip
+		.dip = buttonDip,
+		.menuOpen = mnu.state == MNU_OPEN
 	};
 	
 	return data;

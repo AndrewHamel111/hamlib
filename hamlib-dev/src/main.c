@@ -5,6 +5,11 @@
 
 #include "menu.h"
 
+// Constants
+const int screenWidth = 1280;
+int screenHeight = 720;
+char* menuInputAllowedCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_+=<>[](){}";
+
 // Variables
 Texture2D texButton;
 NPatchInfo nfoButton;
@@ -23,14 +28,10 @@ float polygonRadius = 20; // slider demo
 float polygonRotation = 0;
 float polygonSideCount = 3;
 float polygonMaxRadius = 200;
+float polygonXPosition = screenWidth / 2;
 float maxSideCount = 10;
 
 char testTextfieldTextValue[256]; // textfield demo
-
-// Constants
-const int screenWidth = 1280;
-int screenHeight = 720;
-char* menuInputAllowedCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_+=<>[](){}";
 
 // Functions
 void init(void);
@@ -42,10 +43,15 @@ void loadResources(void);
 void initMenus(void);
 
 // Button functions
+void closeButtonPressed(void);
 void quitButtonPressed(void);
 void radiusChanged(float);
 void rotationChanged(float);
 void sideCountChanged(float);
+
+// Other functions
+void mainMenuOpened(menu mnu);
+void mainMenuClosed(menu mnu);
 
 // Math helpers
 float map(int i, int minIn, int maxIn, int minOut, int maxOut);
@@ -61,7 +67,8 @@ int main(void)
 
 	loadResources();
 
-	while(!WindowShouldClose() && !gameQuit)
+	bool gameIsRunning = !WindowShouldClose() && !gameQuit;
+	while (gameIsRunning)
 	{
 		update();
 
@@ -70,6 +77,8 @@ int main(void)
 			draw();
 
 		EndDrawing();
+		
+		gameIsRunning = !WindowShouldClose() && !gameQuit;
 	}
 
 	CloseWindow();
@@ -90,9 +99,16 @@ void update(void)
 	mouseIsPressed = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
 	mouseIsDown = IsMouseButtonDown(MOUSE_LEFT_BUTTON);
 	
-	if (IsKeyPressed(KEY_P))
+	if (IsMouseButtonPressed(3) || IsMouseButtonPressed(4))
 	{
-		int x = 1;
+		if (mnuMain.state == MNU_OPEN || mnuMain.state == MNU_OPENING)
+		{
+			menuClose(&mnuMain);
+		}
+		else if (mnuMain.state == MNU_CLOSED || mnuMain.state == MNU_CLOSING)
+		{
+			menuOpen(&mnuMain);
+		}
 	}
 	
 	menuUpdate(&mnuMain);
@@ -102,7 +118,9 @@ void draw(void)
 {
 	ClearBackground(WHITE);
 	
-	DrawPoly((Vector2){screenWidth*0.75f, screenHeight*0.5f}, polygonSideCount, polygonRadius, polygonRotation, RED);
+	float pX = mapf(mnuMain.position.x, mnuMain.closedPosition.x, mnuMain.openPosition.x, screenWidth*0.5f, screenWidth*0.75f);
+	
+	DrawPoly((Vector2){pX, screenHeight*0.5f}, polygonSideCount, polygonRadius, polygonRotation, RED);
 	
 	menuDraw(mnuMain);
 }
@@ -140,6 +158,10 @@ void initMenus(void)
 	setMenuElementFont(GetFontDefault());
 	
 	mnuMain = menuCreate(V(0,0), V(screenWidth / 2, screenHeight));
+	mnuMain.onMenuOpened = mainMenuOpened;
+	mnuMain.onMenuClosed = mainMenuClosed;
+	mnuMain.transitionCanBeInterrupted = true;
+	
 	menuAdd(&mnuMain, menuElementCreateLabel( "menu_label",
 		0.1f, 0.1f, 0.8f, 0.08f,
 		"HELLO WORLD", 1.0f, GetColor(0xffa549FF)
@@ -163,11 +185,20 @@ void initMenus(void)
 		GetColor(0xd0d2beff), GetColor(0x708e7eff), GetColor(0xe0e7d5ff),
 		0.0f, SdtBar, sideCountChanged
 	));
+	menuAdd(&mnuMain, menuElementCreateButton( "button_close",
+	   0.1f, 0.75, 0.8, 0.1,
+	   GRAY, closeButtonPressed, "Close Menu", GetColor(0xd43e43FF), 0.5
+	));
 	menuAdd(&mnuMain, menuElementCreateButton( "button_quit",
-		0.1f, 0.8, 0.8, 0.1,
+		0.1f, 0.85, 0.8, 0.1,
 		GRAY, quitButtonPressed, "Quit", GetColor(0xd43e43FF), 0.5
 	));
 	
+}
+
+void closeButtonPressed(void)
+{
+	menuClose(&mnuMain);
 }
 
 void quitButtonPressed(void)
@@ -188,8 +219,20 @@ void rotationChanged(float f)
 void sideCountChanged(float f)
 {
 	int sides = round(f * 7.0f);
-	polygonSideCount = map(sides, 0, 7, 3, 10);
+	polygonSideCount = map(sides, 0, 7, 3, maxSideCount);
 }
+
+void mainMenuOpened(menu mnu)
+{
+	polygonXPosition = screenWidth*0.75f;
+}
+
+void mainMenuClosed(menu mnu)
+{
+	polygonXPosition = screenWidth*0.5f;
+}
+
+//////////////////////////
 
 float map(int i, int minIn, int maxIn, int minOut, int maxOut)
 {

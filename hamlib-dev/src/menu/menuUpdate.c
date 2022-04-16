@@ -6,14 +6,22 @@
 #include <string.h>
 
 static void updateMenuElement(menuElement* element, menu* mnu);
-/// \brief Call with null menuElement to remove highlight
-static void menuHighlightElement(menuElement* element, menu* mnu, bool highlightedByMouse);
-static void menuHightlightNone(menuElement *element, menu *mnu);
 
 static int getShiftedKey(int key);
 
 void menuUpdate(menu* mnu)
 {
+	if (mnu->state == MNU_OPENING || mnu->state == MNU_CLOSING)
+	{
+		handleMenuTransition(mnu);
+		return;
+	}
+	
+	if (mnu->state == MNU_CLOSED)
+	{
+		return;
+	}
+	
 	for (int i = 0; i < MENU_LENGTH; i++)
 	{
 		if (mnu->elementIsValid[i])
@@ -72,13 +80,13 @@ static void updateMenuElement(menuElement* element, menu* mnu)
 			if (typeUsesLightHighlight(element->menuElementType))
 			{
 				if (!CheckCollisionPointRec(mousePosition, elementRect))
-					menuHightlightNone(element, mnu);
+					menuHighlightNone(mnu);
 			}
 			else if (element->menuElementType == MetSlider)
 			{
 				if (!mouseIsDown && !mouseIsPressed)
 				{
-					menuHightlightNone(element, mnu);
+					menuHighlightNone(mnu);
 				}
 			}
 			else if (element->menuElementType == MetTextfield)
@@ -144,7 +152,7 @@ static void updateMenuElement(menuElement* element, menu* mnu)
 			}
 			else if (key == KEY_ESCAPE || key == KEY_ENTER)
 			{
-				menuHightlightNone(element, mnu);
+				menuHighlightNone(mnu);
 			}
 			else if (key > 255)
 			{
@@ -185,34 +193,6 @@ static void updateMenuElement(menuElement* element, menu* mnu)
 		}
 	}
 } // updateMenuElement
-
-static void menuHighlightElement(menuElement *element, menu *mnu, bool highlightedByMouse)
-{
-	if (element == NULL)
-	{
-		menuHightlightNone(element, mnu);
-		return;
-	}
-	else if (mnu->highlightedElement != NULL)
-	{
-		menuHightlightNone(element, mnu);
-	}
-	
-	element->highlighted = true;
-	mnu->lastInteractionWasMouse = highlightedByMouse;
-	mnu->highlightedElement = element;
-	if (element->onElementHighlighted != NULL)
-		element->onElementHighlighted(element);
-} // menuHighlightElement
-
-static void menuHightlightNone(menuElement *element, menu *mnu)
-{
-	menuElement* e = mnu->highlightedElement;
-	e->highlighted = false;
-	if (e->onElementHighlightedOff != NULL)
-		e->onElementHighlightedOff(element);
-	mnu->highlightedElement = NULL;
-}
 
 static int getShiftedKey(int key)
 {

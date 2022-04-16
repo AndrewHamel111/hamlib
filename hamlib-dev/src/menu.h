@@ -19,6 +19,10 @@
 // TODO Write a logging system. Comments that indicate a log should take place there will start with LOG
 // TODO Gamepad / Arrow Key support. Look to my nav example from previous iteration of menu system.
 
+// TODO Fixes
+// TODO Slider button isn't exactly 1:1 with mouse position (look at the center of the button compared to cursor pos at extreme ends of slider)
+// TODO Slider button when clicked directly shouldn't snap exactly to the mouse position but instead the center of the button should stay relative to the cursor
+
 // TODO Menu Management
 // TODO Menu Stack
 // TODO Menu Tweening Options
@@ -67,6 +71,8 @@ typedef struct elementDrawData
 	
 	bool shadow;
 	bool dip;
+	
+	bool menuOpen;
 } elementDrawData;
 typedef void (*elementDrawOverride)(menuElement*, elementDrawData); // builtin functionality overrides
 
@@ -175,17 +181,45 @@ struct menuElement // buttons, labels, sliders, images, and more
 	};
 };
 
-typedef struct menu
+typedef enum menuState
+{
+	MNU_CLOSED = 0,
+	MNU_OPENING,
+	MNU_OPEN,
+	MNU_CLOSING
+} menuState;
+
+typedef struct timingData
+{
+	float duration;
+	float time;
+} timingData;
+
+struct menu; // forward declaration of menu type
+typedef struct menu menu;
+
+typedef void (*menuTransitionEvent)(menu);
+
+struct menu
 {
 	Vector2 position;
 	Vector2 size;
 	
+	Vector2 closedPosition;
+	Vector2 openPosition;
 	menuElement list[MENU_LENGTH];
 	bool elementIsValid[MENU_LENGTH];
 	
+	menuState state;
+	timingData transitionTiming;
+	bool transitionCanBeInterrupted;
+	
+	menuTransitionEvent onMenuOpened;
+	menuTransitionEvent onMenuClosed;
+	
 	bool lastInteractionWasMouse;
 	menuElement* highlightedElement;
-} menu;
+};
 
 menu menuCreate(Vector2 position, Vector2 size);
 void menuUpdate(menu* mnu);
@@ -205,6 +239,9 @@ menuElement menuElementCreateAnimationV(char* elementName, Vector2 position, Vec
 menuElement menuElementCreateButtonV(char* elementName, Vector2 position, Vector2 size, Color buttonTint, buttonAction onPressed, char* buttonText, Color buttonTextColor, float buttonTextFontSize);
 menuElement menuElementCreateSliderV(char* elementName, Vector2 position, Vector2 size, Color sliderBackgroundColor, Color sliderFillColor, Color sliderExtraColor, float initialValue, sliderDisplayEnum displayType, sliderAction onSliderValueChanged);
 menuElement menuElementCreateTextfieldV(char* elementName, Vector2 position, Vector2 size, char* label, float labelFontSize, char* value, int maxLength, Color backgroundColor, Color highlightColor, Color labelColor, Color inputTextColor);
+
+void menuClose(menu* mnu);
+void menuOpen(menu* mnu);
 
 /// Override default values for uncommon fields, only applies to menuElements created after this set call. Set a parameter to NULL to unset a previous value and guarantee use of the default functionality.
 /// \param drawFunction

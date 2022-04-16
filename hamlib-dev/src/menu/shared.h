@@ -15,6 +15,13 @@ extern Font newElementFont;
 extern char* newElementAllowedCharacters;
 
 void getMenuElementPositionAndSize(menuElement e, menu m, Vector2* position, Vector2* size);
+void getMenuElementTextArea(menuElement e, menu m, Vector2* position, Vector2* size);
 bool typeUsesLightHighlight(enum elementType type);
+
+/// \brief Call with null menuElement to remove highlight
+void menuHighlightElement(menuElement* element, menu* mnu, bool highlightedByMouse);
+void menuHighlightNone(menu *mnu);
+
+void handleMenuTransition(menu* mnu);
 
 #endif
